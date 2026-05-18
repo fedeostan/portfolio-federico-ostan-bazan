@@ -27,12 +27,7 @@ export function DockIconButton({
       onClick={onClick}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
-      animate={{
-        scale: active ? 1.1 : 1,
-        backgroundColor: active
-          ? 'color-mix(in oklch, var(--foreground) 6%, transparent)'
-          : 'color-mix(in oklch, var(--foreground) 0%, transparent)',
-      }}
+      animate={{ scale: active ? 1.1 : 1 }}
       whileHover={{ scale: active ? 1.15 : 1.1, y: -2 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 22 }}
@@ -40,10 +35,10 @@ export function DockIconButton({
         'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors',
         'text-foreground/70 hover:text-foreground',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active && 'text-foreground'
+        active && 'bg-white text-foreground shadow-md'
       )}
     >
-      <Icon size={active ? 22 : 20} strokeWidth={active ? 2 : 1.75} />
+      <Icon size={active ? 22 : 20} strokeWidth={active ? 2.25 : 1.75} />
       <span
         className={cn(
           'pointer-events-none absolute -top-9 rounded-md border border-border bg-popover px-2 py-1',
