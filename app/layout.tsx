@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import { BottomDock } from '@/components/nav/BottomDock'
 import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({
@@ -32,6 +33,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         {children}
+        <BottomDock />
         <Toaster />
       </body>
     </html>
