@@ -1,0 +1,17 @@
+node_modules
+.next
+.vercel
+out
+build
+dist
+coverage
+pnpm-lock.yaml
+*.tsbuildinfo
+next-env.d.ts
+public
+
+# Bootstrap docs (preserve hand-authored formatting from issue #1)
+docs/research/**
+CONTRIBUTING.md
+README.md
+.github/**/*.md
