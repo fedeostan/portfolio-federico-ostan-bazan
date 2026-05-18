@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   AnimatePresence,
   motion,
@@ -9,12 +9,14 @@ import {
   useScroll,
 } from 'motion/react'
 
+import { useActiveSection } from '@/hooks/use-active-section'
 import { cn } from '@/lib/utils'
 
 import { DockIconButton } from './DockIconButton'
 import { dockItems, type DockItemKey } from './dock-items'
 
 type BottomDockProps = {
+  /** Overrides the auto-detected active section. Useful for stories / tests. */
   activeKey?: DockItemKey
   onItemClick?: (key: DockItemKey) => void
   className?: string
@@ -27,11 +29,33 @@ export function BottomDock({ activeKey, onItemClick, className }: BottomDockProp
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(false)
 
+  const sectionIds = useMemo(
+    () => dockItems.map((item) => item.anchor.slice(1)),
+    [],
+  )
+  const activeSectionId = useActiveSection(sectionIds)
+  const resolvedActiveKey: DockItemKey | undefined =
+    activeKey ??
+    dockItems.find((item) => item.anchor.slice(1) === activeSectionId)?.key
+
   useMotionValueEvent(scrollY, 'change', (value) => {
     if (!visible && value > SHOW_AFTER_SCROLL_PX) {
       setVisible(true)
     }
   })
+
+  const handleClick = (key: DockItemKey, anchor: string) => {
+    if (typeof document !== 'undefined') {
+      const target = document.getElementById(anchor.slice(1))
+      if (target) {
+        target.scrollIntoView({
+          behavior: reduce ? 'auto' : 'smooth',
+          block: 'start',
+        })
+      }
+    }
+    onItemClick?.(key)
+  }
 
   return (
     <AnimatePresence>
@@ -66,8 +90,11 @@ export function BottomDock({ activeKey, onItemClick, className }: BottomDockProp
                 label={item.label}
                 icon={item.icon}
                 href={item.anchor}
-                active={activeKey === item.key}
-                onClick={onItemClick ? () => onItemClick(item.key) : undefined}
+                active={resolvedActiveKey === item.key}
+                onClick={(event) => {
+                  event.preventDefault()
+                  handleClick(item.key, item.anchor)
+                }}
               />
             ))}
           </motion.div>
