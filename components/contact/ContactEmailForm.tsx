@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ export function ContactEmailForm({ onBack, onClose }: ContactEmailFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<LeadInput>({
-    resolver: zodResolver(leadSchema),
+    resolver: standardSchemaResolver(leadSchema),
     defaultValues: { email: "", message: "" },
     mode: "onBlur",
   });
