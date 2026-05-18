@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Smoke } from './Smoke'
 
 /**
  * Throwaway smoke page for issue #5 — verifies design.md tokens render
@@ -116,6 +117,8 @@ export default function TestThemePage() {
           ))}
         </div>
       </section>
+
+      <Smoke />
     </main>
   )
 }
