@@ -293,12 +293,12 @@ export function AIChatInput({
                 transition: reduce ? { duration: 0 } : undefined,
               }}
             >
-              <Icon name="Globe" size={18} />
+              <Icon name="Globe" size={18} className="shrink-0" />
               <motion.span
                 initial={false}
                 animate={{ opacity: deepSearchActive ? 1 : 0 }}
                 transition={{ duration: reduce ? 0 : 0.2 }}
-                className="pb-[2px]"
+                className="shrink-0 pb-[2px]"
               >
                 Deep Search
               </motion.span>
