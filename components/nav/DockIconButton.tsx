@@ -32,10 +32,10 @@ export function DockIconButton({
       className={cn(
         'group relative flex h-10 w-10 items-center justify-center rounded-full text-foreground/70 transition-colors',
         'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active && 'bg-secondary text-foreground'
+        active && 'bg-white text-foreground shadow-md'
       )}
     >
-      <Icon size={20} strokeWidth={1.75} />
+      <Icon size={20} strokeWidth={active ? 2.25 : 1.75} />
       <span
         className={cn(
           'pointer-events-none absolute -top-9 rounded-md border border-border bg-popover px-2 py-1',
