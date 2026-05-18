@@ -28,7 +28,7 @@ export function ProjectCard({
       href={link}
       aria-label={`Read more about ${title}`}
       className={cn(
-        "group/card relative flex h-[430px] w-full flex-col justify-end overflow-hidden rounded-4xl bg-card outline-none ring-1 ring-border transition-shadow duration-(--duration-base) ease-(--ease-standard) hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring",
+        "group/card relative flex aspect-[34/43] w-full flex-col justify-end overflow-hidden rounded-4xl bg-card outline-none ring-1 ring-border transition-shadow duration-(--duration-base) ease-(--ease-standard) hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >
