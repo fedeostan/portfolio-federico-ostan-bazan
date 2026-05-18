@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   AnimatePresence,
   motion,
@@ -9,12 +9,14 @@ import {
   useScroll,
 } from 'motion/react'
 
+import { useActiveSection } from '@/hooks/use-active-section'
 import { cn } from '@/lib/utils'
 
 import { DockIconButton } from './DockIconButton'
 import { dockItems, type DockItemKey } from './dock-items'
 
 type BottomDockProps = {
+  /** Overrides the auto-detected active section. Useful for stories / tests. */
   activeKey?: DockItemKey
   onItemClick?: (key: DockItemKey) => void
   className?: string
@@ -26,7 +28,15 @@ export function BottomDock({ activeKey, onItemClick, className }: BottomDockProp
   const { scrollY } = useScroll()
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(false)
-  const [spyKey, setSpyKey] = useState<DockItemKey | undefined>(undefined)
+
+  const sectionIds = useMemo(
+    () => dockItems.map((item) => item.anchor.slice(1)),
+    [],
+  )
+  const activeSectionId = useActiveSection(sectionIds)
+  const resolvedActiveKey: DockItemKey | undefined =
+    activeKey ??
+    dockItems.find((item) => item.anchor.slice(1) === activeSectionId)?.key
 
   useMotionValueEvent(scrollY, 'change', (value) => {
     if (!visible && value > SHOW_AFTER_SCROLL_PX) {
@@ -34,44 +44,18 @@ export function BottomDock({ activeKey, onItemClick, className }: BottomDockProp
     }
   })
 
-  useEffect(() => {
-    if (activeKey !== undefined) return
-
-    const entries = dockItems
-      .map((item) => {
-        const id = item.anchor.replace(/^#/, '')
-        const el = document.getElementById(id)
-        return el ? { key: item.key, el } : null
-      })
-      .filter((x): x is { key: DockItemKey; el: HTMLElement } => x !== null)
-
-    if (entries.length === 0) return
-
-    const visibility = new Map<DockItemKey, number>()
-    const observer = new IntersectionObserver(
-      (records) => {
-        for (const record of records) {
-          const match = entries.find((e) => e.el === record.target)
-          if (match) visibility.set(match.key, record.intersectionRatio)
-        }
-        let best: DockItemKey | undefined
-        let bestRatio = 0
-        for (const [key, ratio] of visibility) {
-          if (ratio > bestRatio) {
-            bestRatio = ratio
-            best = key
-          }
-        }
-        setSpyKey(bestRatio > 0 ? best : undefined)
-      },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] }
-    )
-
-    for (const { el } of entries) observer.observe(el)
-    return () => observer.disconnect()
-  }, [activeKey])
-
-  const resolvedActiveKey = activeKey ?? spyKey
+  const handleClick = (key: DockItemKey, anchor: string) => {
+    if (typeof document !== 'undefined') {
+      const target = document.getElementById(anchor.slice(1))
+      if (target) {
+        target.scrollIntoView({
+          behavior: reduce ? 'auto' : 'smooth',
+          block: 'start',
+        })
+      }
+    }
+    onItemClick?.(key)
+  }
 
   return (
     <AnimatePresence>
@@ -107,7 +91,10 @@ export function BottomDock({ activeKey, onItemClick, className }: BottomDockProp
                 icon={item.icon}
                 href={item.anchor}
                 active={resolvedActiveKey === item.key}
-                onClick={onItemClick ? () => onItemClick(item.key) : undefined}
+                onClick={(event) => {
+                  event.preventDefault()
+                  handleClick(item.key, item.anchor)
+                }}
               />
             ))}
           </motion.div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { BottomDock } from '@/components/nav/BottomDock'
 import { SectionShell } from '@/components/motion/SectionShell'
 
 const sections = [
@@ -24,6 +25,7 @@ export default function TestDockPage() {
           </div>
         </SectionShell>
       ))}
+      <BottomDock />
     </main>
   )
 }
