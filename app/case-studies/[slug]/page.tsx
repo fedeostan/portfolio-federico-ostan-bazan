@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
   const { data: project } = await getProjectBySlug(slug);
-  if (!project) notFound();
+  if (!project) return notFound();
 
   const heroAsset = getHeroAsset(project.project_assets);
 
