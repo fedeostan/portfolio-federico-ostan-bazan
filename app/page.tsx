@@ -4,6 +4,8 @@ import { HomeScrollSnap } from "@/components/home/HomeScrollSnap";
 import { SectionShell } from "@/components/motion/SectionShell";
 import { SectionAI } from "@/components/sections/SectionAI";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <HomeScrollSnap>
