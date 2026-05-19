@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/refs */
 "use client";
 
 import {
@@ -19,11 +18,13 @@ const ACTIVE_WINDOW = 16;
 
 interface StreamingTextProps {
   text: string;
+  isStreaming: boolean;
   className?: string;
 }
 
 export function StreamingText({
   text,
+  isStreaming,
   className,
 }: StreamingTextProps) {
   const reduce = useReducedMotion();
@@ -41,7 +42,14 @@ export function StreamingText({
   });
 
   if (reduce) {
-    return <p className={cn("whitespace-pre-wrap", className)}>{text}</p>;
+    return (
+      <p
+        aria-busy={isStreaming || undefined}
+        className={cn("whitespace-pre-wrap", className)}
+      >
+        {text}
+      </p>
+    );
   }
 
   const settledThreshold = Math.max(0, totalCount - ACTIVE_WINDOW);
@@ -49,8 +57,12 @@ export function StreamingText({
   const activeTokens = tokens.slice(settledThreshold);
 
   return (
-    <p className={cn("whitespace-pre-wrap", className)}>
+    <p
+      aria-busy={isStreaming || undefined}
+      className={cn("whitespace-pre-wrap", className)}
+    >
       {settled.length > 0 ? <span>{settled}</span> : null}
+      {/* eslint-disable-next-line react-hooks/refs -- intentional: prevCount is read from ref before useEffect to diff new tokens during render */}
       {activeTokens.map((tok, i) => {
         const absoluteIndex = settledThreshold + i;
         if (/^\s+$/.test(tok)) {
