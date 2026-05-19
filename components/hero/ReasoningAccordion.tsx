@@ -7,7 +7,7 @@ import {
   type Transition,
 } from "motion/react";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { StreamingText } from "@/components/hero/StreamingText";
 import { cn } from "@/lib/utils";
@@ -29,24 +29,11 @@ export function ReasoningAccordion({
   className,
 }: ReasoningAccordionProps) {
   const reduce = useReducedMotion();
-  const [userToggled, setUserToggled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // `override === null` means "follow the auto rule"; once the user clicks, override becomes a sticky boolean.
+  const [override, setOverride] = useState<boolean | null>(null);
 
-  // Intentional auto-toggle: open when streaming, close when complete, unless user toggled
-  useEffect(() => {
-    if (userToggled) return;
-
-    // Schedule state update asynchronously to avoid synchronous setState in effect
-    const timer = setTimeout(() => {
-      if (isStreaming && text.length > 0) {
-        setOpen(true);
-      } else if (!isStreaming) {
-        setOpen(false);
-      }
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, [isStreaming, text, userToggled]);
+  const autoOpen = isStreaming && text.length > 0;
+  const open = override ?? autoOpen;
 
   if (text.length === 0) return null;
 
@@ -59,10 +46,7 @@ export function ReasoningAccordion({
     >
       <button
         type="button"
-        onClick={() => {
-          setUserToggled(true);
-          setOpen((prev) => !prev);
-        }}
+        onClick={() => setOverride(!open)}
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-muted-foreground transition-colors duration-(--duration-base) ease-(--ease-standard) hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
       >
