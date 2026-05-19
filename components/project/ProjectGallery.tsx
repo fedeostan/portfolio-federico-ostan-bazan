@@ -17,17 +17,10 @@ import { ProjectCard } from "./ProjectCard";
 
 type ProjectGalleryProps = {
   items: ProjectCardProps[];
-  title?: string;
-  description?: string;
   className?: string;
 };
 
-export function ProjectGallery({
-  items,
-  title,
-  description,
-  className,
-}: ProjectGalleryProps) {
+export function ProjectGallery({ items, className }: ProjectGalleryProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
@@ -50,44 +43,28 @@ export function ProjectGallery({
   }, [api]);
 
   return (
-    <section className={cn("w-full", className)}>
-      <div className="mx-auto max-w-[1796px] px-6 md:px-12 2xl:px-[max(8rem,calc(50vw-700px))]">
-        <div className="mb-12 flex items-end justify-between gap-6">
-          <div className="flex max-w-[610px] flex-col gap-6">
-            {title ? (
-              <h2 className="font-heading text-2xl leading-8 font-semibold text-foreground">
-                {title}
-              </h2>
-            ) : null}
-            {description ? (
-              <p className="text-base leading-6 font-medium text-muted-foreground">
-                {description}
-              </p>
-            ) : null}
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 md:flex">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => api?.scrollPrev()}
-              disabled={!canScrollPrev}
-              aria-label="Previous projects"
-              className="disabled:pointer-events-auto"
-            >
-              <ArrowLeft className="size-5" strokeWidth={2} />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => api?.scrollNext()}
-              disabled={!canScrollNext}
-              aria-label="Next projects"
-              className="disabled:pointer-events-auto"
-            >
-              <ArrowRight className="size-5" strokeWidth={2} />
-            </Button>
-          </div>
-        </div>
+    <div className={cn("flex w-full flex-col gap-6", className)}>
+      <div className="hidden items-center justify-end gap-2 px-6 md:flex md:px-12 2xl:px-[max(8rem,calc(50vw-700px))]">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => api?.scrollPrev()}
+          disabled={!canScrollPrev}
+          aria-label="Previous projects"
+          className="disabled:pointer-events-auto"
+        >
+          <ArrowLeft className="size-5" strokeWidth={2} />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => api?.scrollNext()}
+          disabled={!canScrollNext}
+          aria-label="Next projects"
+          className="disabled:pointer-events-auto"
+        >
+          <ArrowRight className="size-5" strokeWidth={2} />
+        </Button>
       </div>
 
       <Carousel
@@ -132,6 +109,6 @@ export function ProjectGallery({
           />
         ))}
       </div>
-    </section>
+    </div>
   );
 }
