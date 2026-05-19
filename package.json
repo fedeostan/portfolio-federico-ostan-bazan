@@ -17,6 +17,7 @@
     "@ai-sdk/gateway": "^3.0.115",
     "@ai-sdk/react": "^3.0.186",
     "@hookform/resolvers": "^5.2.2",
+    "@mendable/firecrawl-js": "^4.24.1",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "ai": "^6.0.184",

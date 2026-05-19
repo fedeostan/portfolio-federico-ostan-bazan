@@ -1,3 +1,5 @@
+import { briefAsSystemContext, type JobBrief } from "@/lib/ingest/job-brief";
+
 export type RedirectTarget = {
   slug: string;
   title: string;
@@ -11,6 +13,8 @@ export type SystemPromptOptions = {
   project_title?: string;
   /** Other published projects the assistant may suggest as a redirect when refusing out-of-scope questions. */
   other_projects?: RedirectTarget[];
+  /** Optional normalized job brief to ground a global-mode conversation against. Ignored in scoped mode. */
+  job_brief?: JobBrief | null;
 };
 
 const GROUNDING_RULES = `Grounding rules (non-negotiable):
@@ -30,8 +34,13 @@ const GLOBAL_WORKFLOW = `Workflow for project questions:
 4. After tool calls, write ONE short narrative paragraph (≤4 sentences) summarizing what you showed and inviting a next step.
 5. Use at most 6 reasoning/tool steps total.`;
 
-function buildGlobalPrompt(): string {
-  return [GLOBAL_PERSONA, GROUNDING_RULES, GLOBAL_WORKFLOW, TONE].join("\n\n");
+function buildBriefAddendum(job_brief: JobBrief): string {
+  return `\n\n${briefAsSystemContext(job_brief)}\n\nBRIEF-MODE WORKFLOW (overrides the default workflow for this turn):\n1. Assume the visitor is evaluating Federico for this role. Do not say "I can't open URLs" — the brief above is the URL's contents, already extracted.\n2. Call search_projects using a query built from the brief's "Problems the role must solve" — not just the user's literal question.\n3. Call show_project_card on the 1–3 strongest matches.\n4. Write ONE short paragraph (≤4 sentences) that explicitly connects Federico's strongest work to the brief's role, problems, and outcomes. Name the company from the brief at least once.\n5. End with one concrete question that helps the visitor go deeper (e.g. "Want me to dig into the metrics on <project>?").`;
+}
+
+function buildGlobalPrompt(job_brief?: JobBrief | null): string {
+  const base = [GLOBAL_PERSONA, GROUNDING_RULES, GLOBAL_WORKFLOW, TONE].join("\n\n");
+  return job_brief ? base + buildBriefAddendum(job_brief) : base;
 }
 
 function buildRedirectSection(targets: RedirectTarget[]): string {
@@ -82,9 +91,10 @@ export function systemPrompt({
   project_id,
   project_title,
   other_projects,
+  job_brief,
 }: SystemPromptOptions = {}): string {
   if (project_id) {
     return buildScopedPrompt(project_id, project_title, other_projects ?? []);
   }
-  return buildGlobalPrompt();
+  return buildGlobalPrompt(job_brief);
 }

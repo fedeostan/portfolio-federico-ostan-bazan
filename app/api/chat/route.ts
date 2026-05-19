@@ -9,6 +9,7 @@ import { gateway, PRIMARY_MODEL } from "@/lib/ai/gateway";
 import { buildTools } from "@/lib/ai/tools";
 import { systemPrompt, type RedirectTarget } from "@/lib/ai/prompts";
 import { listProjectsForRedirect } from "@/lib/db/queries";
+import { jobBriefSchema } from "@/lib/ingest/job-brief";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,6 +18,7 @@ const bodySchema = z.object({
   messages: z.array(z.any()) as z.ZodType<UIMessage[]>,
   project_id: z.string().optional(),
   project_title: z.string().optional(),
+  job_brief: jobBriefSchema.optional(),
 });
 
 export async function POST(req: Request) {
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { messages, project_id, project_title } = parsed;
+  const { messages, project_id, project_title, job_brief } = parsed;
   const startedAt = Date.now();
   const scopedTools = buildTools({ project_id });
 
@@ -46,7 +48,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: gateway(PRIMARY_MODEL),
-    system: systemPrompt({ project_id, project_title, other_projects }),
+    system: systemPrompt({ project_id, project_title, other_projects, job_brief }),
     messages: await convertToModelMessages(messages),
     tools: scopedTools,
     stopWhen: stepCountIs(project_id ? 3 : 6),
@@ -64,6 +66,7 @@ export async function POST(req: Request) {
       console.log("[/api/chat]", {
         model: PRIMARY_MODEL,
         scoped: project_id ?? null,
+        brief: job_brief ? `${job_brief.role}@${job_brief.company}` : null,
         latencyMs: Date.now() - startedAt,
         steps: steps.length,
         toolCalls: counts,
