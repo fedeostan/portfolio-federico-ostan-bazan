@@ -8,8 +8,10 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react'
+import { toast } from 'sonner'
 
 import { Icon } from '@/components/ui/icon'
+import { useMediaRecorder, type RecorderError } from '@/hooks/use-media-recorder'
 import { cn } from '@/lib/utils'
 
 /**
@@ -44,8 +46,39 @@ export function AIChatInput({
   const inputRef = useRef<HTMLInputElement>(null)
   const reduce = useReducedMotion()
 
-  const isExpanded = isActive || inputValue.length > 0
-  const shouldCycle = !isActive && inputValue.length === 0
+  const handleTranscript = (text: string) => {
+    setInputValue((prev) => (prev ? `${prev} ${text}`.trim() : text))
+    setIsActive(true)
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  const handleRecorderError = (error: RecorderError) => {
+    const message =
+      error.code === 'permission-denied'
+        ? 'Microphone access denied. Enable it in your browser settings.'
+        : error.code === 'no-device'
+          ? 'No microphone found.'
+          : error.code === 'unsupported'
+            ? 'Voice input is not supported in this browser.'
+            : error.code === 'transcription-failed'
+              ? 'Could not transcribe audio. Try again.'
+              : 'Something went wrong with the recorder.'
+    toast.error(message)
+  }
+
+  const recorder = useMediaRecorder({
+    onTranscript: handleTranscript,
+    onError: handleRecorderError,
+  })
+
+  const isRecording = recorder.state === 'recording'
+  const isStopping = recorder.state === 'stopping'
+  const isTranscribing = recorder.state === 'transcribing'
+  const isRequesting = recorder.state === 'requesting'
+  const isVoiceBusy = recorder.isActive
+
+  const isExpanded = isActive || inputValue.length > 0 || isVoiceBusy
+  const shouldCycle = !isActive && inputValue.length === 0 && !isVoiceBusy
 
   useEffect(() => {
     if (!shouldCycle) return
@@ -63,13 +96,18 @@ export function AIChatInput({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node) && !inputValue) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node) &&
+        !inputValue &&
+        !isVoiceBusy
+      ) {
         setIsActive(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [inputValue])
+  }, [inputValue, isVoiceBusy])
 
   const handleSubmit = () => {
     const trimmed = inputValue.trim()
@@ -88,6 +126,20 @@ export function AIChatInput({
   }
 
   const stopBubble = (event: ReactMouseEvent) => event.stopPropagation()
+
+  const handleMicClick = (event: ReactMouseEvent) => {
+    stopBubble(event)
+    if (recorder.state === 'idle') {
+      void recorder.start()
+    } else if (isRecording) {
+      recorder.stop()
+    }
+  }
+
+  const handleCancelClick = (event: ReactMouseEvent) => {
+    stopBubble(event)
+    recorder.cancel()
+  }
 
   const containerVariants: Variants = {
     collapsed: {
@@ -163,6 +215,16 @@ export function AIChatInput({
   const activeChipClasses = 'bg-foreground text-background'
   const inactiveChipClasses = 'bg-accent text-foreground hover:bg-border'
 
+  const micLabel = isRecording
+    ? 'Stop recording'
+    : isTranscribing
+      ? 'Transcribing'
+      : isRequesting
+        ? 'Requesting microphone'
+        : 'Voice input'
+  const showCancel = isRecording || isStopping
+  const showVoiceIndicator = isRecording || isStopping || isTranscribing
+
   return (
     <motion.div
       ref={wrapperRef}
@@ -201,42 +263,103 @@ export function AIChatInput({
             />
             <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center">
               <AnimatePresence mode="wait">
-                {showPlaceholder && shouldCycle && (
-                  <motion.span
-                    key={placeholderIndex}
-                    className="text-muted-foreground absolute top-1/2 left-0 flex -translate-y-1/2 text-base font-medium whitespace-nowrap select-none"
-                    variants={placeholderContainerVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
+                {showVoiceIndicator ? (
+                  <motion.div
+                    key="voice-indicator"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduce ? 0 : 0.2 }}
+                    className="text-muted-foreground flex items-center gap-2 text-sm font-medium"
                   >
-                    {placeholders[placeholderIndex].split('').map((char, index) => (
-                      <motion.span
-                        key={`${placeholderIndex}-${index}`}
-                        variants={letterVariants}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {char === ' ' ? ' ' : char}
-                      </motion.span>
-                    ))}
-                  </motion.span>
+                    <VoiceWaveform active={isRecording} reduce={reduce ?? false} />
+                    <span>
+                      {isTranscribing
+                        ? 'Transcribing…'
+                        : isStopping
+                          ? 'Wrapping up…'
+                          : 'Listening…'}
+                    </span>
+                  </motion.div>
+                ) : (
+                  showPlaceholder &&
+                  shouldCycle && (
+                    <motion.span
+                      key={placeholderIndex}
+                      className="text-muted-foreground absolute top-1/2 left-0 flex -translate-y-1/2 text-base font-medium whitespace-nowrap select-none"
+                      variants={placeholderContainerVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                    >
+                      {placeholders[placeholderIndex].split('').map((char, index) => (
+                        <motion.span
+                          key={`${placeholderIndex}-${index}`}
+                          variants={letterVariants}
+                          style={{ display: 'inline-block' }}
+                        >
+                          {char === ' ' ? ' ' : char}
+                        </motion.span>
+                      ))}
+                    </motion.span>
+                  )
                 )}
               </AnimatePresence>
             </div>
           </div>
 
+          <AnimatePresence initial={false}>
+            {showCancel && (
+              <motion.button
+                key="cancel-voice"
+                type="button"
+                aria-label="Cancel recording"
+                onClick={handleCancelClick}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: reduce ? 0 : 0.15 }}
+                className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              >
+                <Icon name="X" size={20} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+
           <button
             type="button"
-            aria-label="Voice input"
-            className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            aria-label={micLabel}
+            aria-pressed={isRecording}
+            disabled={isStopping || isTranscribing || isRequesting}
+            onClick={handleMicClick}
+            className={cn(
+              'focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60',
+              isRecording
+                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/85'
+                : 'hover:bg-accent',
+            )}
           >
-            <Icon name="Mic" size={20} />
+            {isRecording ? (
+              <motion.span
+                animate={reduce ? undefined : { scale: [1, 1.15, 1] }}
+                transition={
+                  reduce ? undefined : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
+                }
+                className="flex items-center justify-center"
+              >
+                <Icon name="Square" size={16} />
+              </motion.span>
+            ) : isTranscribing || isStopping || isRequesting ? (
+              <Icon name="Loader2" size={18} className="animate-spin" />
+            ) : (
+              <Icon name="Mic" size={20} />
+            )}
           </button>
 
           <button
             type="button"
             aria-label="Send message"
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isVoiceBusy}
             onClick={(event) => {
               stopBubble(event)
               handleSubmit()
@@ -307,5 +430,33 @@ export function AIChatInput({
         </motion.div>
       </div>
     </motion.div>
+  )
+}
+
+function VoiceWaveform({ active, reduce }: { active: boolean; reduce: boolean }) {
+  const bars = [0, 1, 2, 3]
+  return (
+    <div aria-hidden className="flex h-4 items-center gap-[3px]">
+      {bars.map((index) => (
+        <motion.span
+          key={index}
+          className="bg-destructive block w-[3px] rounded-full"
+          initial={{ height: 6 }}
+          animate={
+            active && !reduce ? { height: [6, 14, 8, 16, 6] } : { height: 6 }
+          }
+          transition={
+            active && !reduce
+              ? {
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: index * 0.12,
+                }
+              : { duration: 0 }
+          }
+        />
+      ))}
+    </div>
   )
 }
