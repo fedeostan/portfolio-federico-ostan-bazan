@@ -54,3 +54,8 @@ coverage/
 .turbo
 .cache
 *.log
+
+# Claude Code / Superpowers runtime state (not tooling config — runtime caches & locks)
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.superpowers/
