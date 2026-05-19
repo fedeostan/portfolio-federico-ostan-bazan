@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 
 import { ImageWithCaption } from "@/components/case-study/ImageWithCaption";
 import { cn } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 type MarkdownProps = {
   content: string;
@@ -65,9 +66,10 @@ const components: Components = {
           href={href}
           target="_blank"
           rel="noreferrer"
-          className="text-foreground underline underline-offset-4 hover:no-underline"
+          className="text-foreground inline-flex items-baseline gap-1 underline underline-offset-4 hover:no-underline"
         >
           {children}
+          <ExternalLink className="size-3.5 shrink-0 translate-y-[1px]" aria-hidden="true" />
         </a>
       );
     }

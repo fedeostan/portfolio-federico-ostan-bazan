@@ -35,9 +35,9 @@ export function TextImageSplit({
         />
       </div>
       {heading ? (
-        <p className="text-foreground mt-6 w-full text-xl leading-7 font-semibold">
+        <h2 className="text-foreground mt-6 w-full text-xl leading-7 font-semibold">
           {heading}
-        </p>
+        </h2>
       ) : null}
     </div>
   ) : null;

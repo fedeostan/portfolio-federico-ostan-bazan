@@ -16,11 +16,11 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
 });
 
 function formatDate(project: ProjectWithRelations): string | null {
-  if (project.created_at) {
-    return DATE_FORMATTER.format(new Date(project.created_at));
-  }
   if (project.year) {
     return String(project.year);
+  }
+  if (project.created_at) {
+    return DATE_FORMATTER.format(new Date(project.created_at));
   }
   return null;
 }
