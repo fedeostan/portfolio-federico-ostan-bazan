@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { ChatInputWrapper } from "@/components/hero/ChatInputWrapper";
 import { HeroTitle } from "@/components/hero/HeroTitle";
+import type { JobBrief } from "@/lib/ingest/job-brief";
 
 type HeroStage =
   | "mount"
@@ -48,7 +49,7 @@ const readSessionFlag = () => {
 const readSessionFlagServer = () => false;
 
 interface HeroSequenceProps {
-  onSend?: (value: string) => void;
+  onSend?: (value: string, brief?: JobBrief | null) => void;
 }
 
 export function HeroSequence({ onSend }: HeroSequenceProps) {

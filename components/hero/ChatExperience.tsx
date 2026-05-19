@@ -17,15 +17,18 @@ import { ToolStatusPill } from "@/components/hero/ToolStatusPill";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
 import { reduceMessageParts } from "@/lib/ai/reduce-message-parts";
+import type { JobBrief } from "@/lib/ingest/job-brief";
 import type { ProjectCardProps } from "@/types/project";
 
 interface ChatExperienceProps {
   initialPrompt: string;
+  initialBrief?: JobBrief | null;
   onReset: () => void;
 }
 
 export function ChatExperience({
   initialPrompt,
+  initialBrief = null,
   onReset,
 }: ChatExperienceProps) {
   const reduce = useReducedMotion();
@@ -46,8 +49,11 @@ export function ChatExperience({
   useEffect(() => {
     if (sentRef.current || !initialPrompt) return;
     sentRef.current = true;
-    sendMessage({ text: initialPrompt });
-  }, [initialPrompt, sendMessage]);
+    sendMessage(
+      { text: initialPrompt },
+      initialBrief ? { body: { job_brief: initialBrief } } : undefined,
+    );
+  }, [initialPrompt, initialBrief, sendMessage]);
 
   const isStreaming = status === "streaming" || status === "submitted";
 

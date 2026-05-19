@@ -8,6 +8,7 @@ import { z } from "zod";
 import { gateway, PRIMARY_MODEL } from "@/lib/ai/gateway";
 import { tools } from "@/lib/ai/tools";
 import { systemPrompt } from "@/lib/ai/prompts";
+import { jobBriefSchema } from "@/lib/ingest/job-brief";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -15,6 +16,7 @@ export const maxDuration = 60;
 const bodySchema = z.object({
   messages: z.array(z.any()) as z.ZodType<UIMessage[]>,
   project_id: z.string().optional(),
+  job_brief: jobBriefSchema.optional(),
 });
 
 export async function POST(req: Request) {
@@ -28,12 +30,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const { messages, project_id } = parsed;
+  const { messages, project_id, job_brief } = parsed;
   const startedAt = Date.now();
 
   const result = streamText({
     model: gateway(PRIMARY_MODEL),
-    system: systemPrompt({ project_id }),
+    system: systemPrompt({ project_id, job_brief }),
     messages: await convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(6),

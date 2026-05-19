@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 
 import { ChatExperience } from "@/components/hero/ChatExperience";
 import { HeroSequence } from "@/components/hero/HeroSequence";
+import type { JobBrief } from "@/lib/ingest/job-brief";
 
 const ENTER_TRANSITION: Transition = {
   duration: 0.6,
@@ -22,6 +23,7 @@ export function HeroChat() {
   const reduce = useReducedMotion();
   const [mode, setMode] = useState<Mode>("idle");
   const [initialPrompt, setInitialPrompt] = useState<string>("");
+  const [initialBrief, setInitialBrief] = useState<JobBrief | null>(null);
 
   useEffect(() => {
     if (mode !== "active") return;
@@ -32,14 +34,16 @@ export function HeroChat() {
     };
   }, [mode]);
 
-  const enter = (prompt: string) => {
+  const enter = (prompt: string, brief?: JobBrief | null) => {
     setInitialPrompt(prompt);
+    setInitialBrief(brief ?? null);
     setMode("active");
   };
 
   const leave = () => {
     setMode("idle");
     setInitialPrompt("");
+    setInitialBrief(null);
   };
 
   return (
@@ -86,6 +90,7 @@ export function HeroChat() {
         >
           <ChatExperience
             initialPrompt={initialPrompt}
+            initialBrief={initialBrief}
             onReset={leave}
           />
         </motion.div>

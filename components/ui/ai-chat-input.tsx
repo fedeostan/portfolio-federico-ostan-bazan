@@ -4,6 +4,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type ClipboardEvent as ReactClipboardEvent,
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
@@ -11,6 +12,10 @@ import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion
 
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
+
+const FILE_ACCEPT =
+  '.pdf,.docx,.md,.markdown,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain'
+const URL_REGEX = /https?:\/\/[^\s<>"']+/i
 
 /**
  * UX-audience-tuned placeholders. Override via the `placeholders` prop.
@@ -25,12 +30,21 @@ const DEFAULT_PLACEHOLDERS = [
 
 interface AIChatInputProps {
   onSend: (value: string) => void
+  /** Called when the user picks a file via the paperclip. Parent owns the upload. */
+  onAttachFile?: (file: File) => void
+  /** Called when the user pastes a string that contains an http(s) URL. */
+  onPasteUrl?: (url: string) => void
+  /** Disables the attach + paste handlers (e.g. during an in-flight upload). */
+  attachDisabled?: boolean
   placeholders?: readonly string[]
   className?: string
 }
 
 export function AIChatInput({
   onSend,
+  onAttachFile,
+  onPasteUrl,
+  attachDisabled = false,
   placeholders = DEFAULT_PLACEHOLDERS,
   className,
 }: AIChatInputProps) {
@@ -42,6 +56,7 @@ export function AIChatInput({
   const [inputValue, setInputValue] = useState('')
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const reduce = useReducedMotion()
 
   const isExpanded = isActive || inputValue.length > 0
@@ -85,6 +100,20 @@ export function AIChatInput({
       event.preventDefault()
       handleSubmit()
     }
+  }
+
+  const handlePaste = (event: ReactClipboardEvent<HTMLInputElement>) => {
+    if (!onPasteUrl || attachDisabled) return
+    const pasted = event.clipboardData.getData('text')
+    if (!pasted) return
+    const match = pasted.match(URL_REGEX)
+    if (match) onPasteUrl(match[0])
+  }
+
+  const handleAttachClick = (event: ReactMouseEvent) => {
+    event.stopPropagation()
+    if (!onAttachFile || attachDisabled) return
+    fileInputRef.current?.click()
   }
 
   const stopBubble = (event: ReactMouseEvent) => event.stopPropagation()
@@ -181,11 +210,26 @@ export function AIChatInput({
         <div className="flex items-center gap-2 p-3">
           <button
             type="button"
-            aria-label="Attach file"
-            className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            aria-label="Attach a job description (PDF, DOCX, MD, TXT)"
+            disabled={!onAttachFile || attachDisabled}
+            onClick={handleAttachClick}
+            className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40"
           >
             <Icon name="Paperclip" size={20} />
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={FILE_ACCEPT}
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+              if (file && onAttachFile) onAttachFile(file)
+            }}
+          />
 
           <div className="relative flex-1">
             <input
@@ -195,6 +239,7 @@ export function AIChatInput({
               onChange={(event) => setInputValue(event.target.value)}
               onFocus={() => setIsActive(true)}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               aria-label="Ask Federico anything"
               className="placeholder:text-muted-foreground w-full border-0 bg-transparent text-base font-medium outline-none placeholder:opacity-0"
               style={{ position: 'relative', zIndex: 1 }}
