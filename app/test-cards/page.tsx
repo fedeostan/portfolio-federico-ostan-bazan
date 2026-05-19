@@ -2,6 +2,7 @@ import { MetricCallout } from "@/components/project/MetricCallout";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { ProjectGallery } from "@/components/project/ProjectGallery";
 import { TechStackBadges } from "@/components/project/TechStackBadges";
+import { SectionShellWithHeader } from "@/components/sections/SectionShellWithHeader";
 import type { ProjectCardProps } from "@/types/project";
 
 const sampleProjects: ProjectCardProps[] = [
@@ -103,11 +104,13 @@ export default function TestCardsPage() {
         </ul>
       </section>
 
-      <ProjectGallery
-        title="Artificial Inteligence"
-        description="Here is my collection of A.I. related projects. Im half obseded with the potential of this techonolgy and I feel the need to epxlore by mysefl in every free time I have. Please enjoy epxloring some of them as I much enjoy working on them."
-        items={sampleProjects}
-      />
+      <SectionShellWithHeader
+        id="harness-section-ai"
+        title="Artificial Intelligence"
+        description="Here is my collection of A.I. related projects. I'm half obsessed with the potential of this technology and I feel the need to explore on my own in every free moment I have. Please enjoy exploring some of them as much as I enjoyed working on them."
+      >
+        <ProjectGallery items={sampleProjects} />
+      </SectionShellWithHeader>
 
       <section className="px-6 md:px-12">
         <header className="mb-12 max-w-2xl">
