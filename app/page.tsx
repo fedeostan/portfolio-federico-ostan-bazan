@@ -5,6 +5,7 @@ import { SectionShell } from "@/components/motion/SectionShell";
 import { SectionAI } from "@/components/sections/SectionAI";
 import { SectionDesktop } from "@/components/sections/SectionDesktop";
 import { SectionMobile } from "@/components/sections/SectionMobile";
+import { SectionPersonal } from "@/components/sections/SectionPersonal";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default function Home() {
       <SectionAI id="section-ai" />
       <SectionMobile id="section-mobile" />
       <SectionDesktop id="section-desktop" />
+      <SectionPersonal id="section-personal" />
     </HomeScrollSnap>
   );
 }
