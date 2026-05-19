@@ -28,31 +28,50 @@ const PROJECTS: SeedProject[] = [
     description:
       "Aurora is a placeholder AI project used to exercise the case-study template. It demonstrates end-to-end retrieval with sections, assets, and tech stack metadata.",
     tech_stack: ["Next.js", "AI SDK", "Vercel AI Gateway", "Supabase"],
-    metrics: { adoption: "12k waitlist", retention: "44% D30" },
+    metrics: { adoption: "12k waitlist", retention: "44% D30", nps: "62" },
     category: "ai",
     og_image: "https://placehold.co/1200x630/png?text=Aurora",
     published: true,
     sections: [
       {
-        section_type: "problem",
+        section_type: "text",
         heading: "The blank page is the enemy",
         content_md:
-          "Writers stall at the first sentence. Aurora bridges intent and structure so first drafts arrive in minutes, not hours.",
+          "Writers stall at the first sentence. **Aurora** bridges intent and structure so first drafts arrive in minutes, not hours.\n\nWe started by interviewing 32 long-form writers and discovered that *outline anxiety* — not prose — was the real friction point.",
         order: 1,
       },
       {
-        section_type: "solution",
+        section_type: "image+text",
         heading: "Outline-first AI",
         content_md:
           "Instead of generating prose first, Aurora generates a navigable outline you can edit before any paragraph is written.",
         order: 2,
       },
       {
-        section_type: "outcome",
+        section_type: "metrics",
         heading: "Outcomes",
-        content_md:
-          "Beta users shipped 3.4× more drafts per week without sacrificing voice consistency.",
+        content_md: null,
         order: 3,
+      },
+      {
+        section_type: "text",
+        heading: "What we learned",
+        content_md:
+          "Beta users shipped **3.4× more drafts per week** without sacrificing voice consistency. The outline-first approach worked because it externalised the cognitive load of structure.",
+        order: 4,
+      },
+      {
+        section_type: "image+text",
+        heading: "Voice consistency",
+        content_md:
+          "A second model continuously checks new paragraphs against the writer's existing voice — flagging tone drift before it compounds.",
+        order: 5,
+      },
+      {
+        section_type: "gallery",
+        heading: "Screens",
+        content_md: null,
+        order: 6,
       },
     ],
     assets: [
@@ -65,10 +84,31 @@ const PROJECTS: SeedProject[] = [
       },
       {
         type: "screenshot",
-        url: "https://placehold.co/1200x800/png?text=Aurora+Outline",
+        url: "https://placehold.co/1200x800/png?text=Outline",
         alt_text: "Outline editor screen",
         caption: "Outline-first editor",
         order: 2,
+      },
+      {
+        type: "screenshot",
+        url: "https://placehold.co/1200x800/png?text=Voice",
+        alt_text: "Voice consistency screen",
+        caption: "Voice consistency panel",
+        order: 5,
+      },
+      {
+        type: "screenshot",
+        url: "https://placehold.co/1200x800/png?text=Drafts",
+        alt_text: "Drafts list",
+        caption: "Drafts dashboard",
+        order: 7,
+      },
+      {
+        type: "screenshot",
+        url: "https://placehold.co/1200x800/png?text=Settings",
+        alt_text: "Settings panel",
+        caption: "Settings",
+        order: 8,
       },
     ],
   },
@@ -83,24 +123,30 @@ const PROJECTS: SeedProject[] = [
     description:
       "Tide is a placeholder mobile project used to exercise retrieval and the mobile category filter.",
     tech_stack: ["React Native", "Expo", "HealthKit", "TypeScript"],
-    metrics: { rating: "4.8 App Store", sessions: "2.1M monthly" },
+    metrics: { rating: "4.8 App Store", sessions: "2.1M monthly", retention: "58% D30" },
     category: "mobile",
     og_image: "https://placehold.co/1200x630/png?text=Tide",
     published: true,
     sections: [
       {
-        section_type: "problem",
+        section_type: "text",
         heading: "Sessions that don't fit your day",
         content_md:
-          "Most meditation apps assume a fixed 10-minute window. Tide adapts to the time and energy you actually have.",
+          "Most meditation apps assume a fixed 10-minute window. **Tide adapts** to the time and energy you actually have.",
         order: 1,
       },
       {
-        section_type: "solution",
+        section_type: "image+text",
         heading: "Adaptive sessions",
         content_md:
           "We use HRV signals and a quick mood check to pick a 2–20 minute session that suits the moment.",
         order: 2,
+      },
+      {
+        section_type: "metrics",
+        heading: "Outcomes",
+        content_md: null,
+        order: 3,
       },
     ],
     assets: [
@@ -110,6 +156,13 @@ const PROJECTS: SeedProject[] = [
         alt_text: "Tide hero placeholder",
         caption: "Hero shot — placeholder",
         order: 1,
+      },
+      {
+        type: "screenshot",
+        url: "https://placehold.co/1200x800/png?text=Tide+Adaptive",
+        alt_text: "Adaptive session selector",
+        caption: "Adaptive session selector",
+        order: 2,
       },
     ],
   },
@@ -130,18 +183,24 @@ const PROJECTS: SeedProject[] = [
     published: true,
     sections: [
       {
-        section_type: "problem",
+        section_type: "text",
         heading: "Codebases as terra incognita",
         content_md:
-          "New engineers spend weeks orienting in a large repo. Quartz makes structure visible at a glance.",
+          "New engineers spend weeks orienting in a large repo. **Quartz** makes structure visible at a glance.",
         order: 1,
       },
       {
-        section_type: "solution",
+        section_type: "image+text",
         heading: "Zoomable architecture maps",
         content_md:
-          "We render a force-directed graph in WebGL, with semantic zoom from system → module → file.",
+          "We render a force-directed graph in WebGL, with *semantic zoom* from system → module → file.",
         order: 2,
+      },
+      {
+        section_type: "metrics",
+        heading: "Adoption",
+        content_md: null,
+        order: 3,
       },
     ],
     assets: [
@@ -152,12 +211,30 @@ const PROJECTS: SeedProject[] = [
         caption: "Hero shot — placeholder",
         order: 1,
       },
+      {
+        type: "screenshot",
+        url: "https://placehold.co/1200x800/png?text=Quartz+Map",
+        alt_text: "Architecture map screen",
+        caption: "Architecture map",
+        order: 2,
+      },
     ],
   },
 ];
 
 async function main() {
   const supabase = createServerClient();
+
+  // Wipe existing seed rows so this script is idempotent.
+  // FK from project_sections / project_assets cascades on project delete.
+  const slugs = PROJECTS.map((p) => p.slug);
+  const { error: wipeError } = await supabase
+    .from("projects")
+    .delete()
+    .in("slug", slugs);
+  if (wipeError) {
+    throw new Error(`Failed to wipe seed projects: ${wipeError.message}`);
+  }
 
   for (const { sections, assets, ...project } of PROJECTS) {
     const { data: inserted, error: projectError } = await supabase
