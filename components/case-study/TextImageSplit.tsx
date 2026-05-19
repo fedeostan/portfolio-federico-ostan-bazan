@@ -22,20 +22,18 @@ export function TextImageSplit({
   const imageBlock = asset ? (
     <div
       className={cn(
-        "bg-surface flex h-[430px] w-full max-w-[340px] flex-col items-center justify-end overflow-hidden rounded-4xl p-6 md:shrink-0",
+        "relative flex h-[430px] w-full max-w-[340px] flex-col items-center justify-end overflow-hidden rounded-4xl p-6 md:shrink-0",
       )}
     >
-      <div className="relative w-full flex-1 min-h-0">
-        <Image
-          src={asset.url}
-          alt={asset.alt_text ?? heading ?? ""}
-          fill
-          sizes="340px"
-          className="object-cover"
-        />
-      </div>
+      <Image
+        src={asset.url}
+        alt={asset.alt_text ?? heading ?? ""}
+        fill
+        sizes="340px"
+        className="object-cover"
+      />
       {heading ? (
-        <h2 className="text-foreground mt-6 w-full text-xl leading-7 font-semibold">
+        <h2 className="text-foreground relative w-full text-xl leading-7 font-semibold">
           {heading}
         </h2>
       ) : null}
@@ -55,7 +53,7 @@ export function TextImageSplit({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-12 md:items-stretch",
+        "flex flex-col items-center gap-12",
         side === "left" ? "md:flex-row" : "md:flex-row-reverse",
         className,
       )}
