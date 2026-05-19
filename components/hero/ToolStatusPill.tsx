@@ -37,7 +37,7 @@ export function ToolStatusPill({
         >
           <span
             aria-hidden
-            className="size-1.5 animate-pulse rounded-full bg-foreground/50"
+            className="size-1.5 animate-pulse rounded-full bg-foreground/50 motion-reduce:animate-none"
           />
           {label}
         </motion.div>
