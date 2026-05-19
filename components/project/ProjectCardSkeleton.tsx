@@ -9,6 +9,7 @@ interface ProjectCardSkeletonProps {
 export function ProjectCardSkeleton({ className }: ProjectCardSkeletonProps) {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading project card"
       className={cn(
@@ -19,7 +20,6 @@ export function ProjectCardSkeleton({ className }: ProjectCardSkeletonProps) {
       <div
         aria-hidden
         className="animate-shimmer absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.06)_50%,transparent_75%)] bg-[length:200%_100%]"
-        style={{ animation: "shimmer 1.5s linear infinite" }}
       />
       <div className="absolute inset-0 flex flex-col justify-end gap-3 p-6">
         <div className="h-3 w-1/3 rounded-full bg-muted/60" />

@@ -172,6 +172,14 @@
   100% { background-position: -200% 0; }
 }
 
+@theme inline {
+  --animate-shimmer: shimmer 1.5s linear infinite;
+}
+
+.animate-shimmer {
+  animation: var(--animate-shimmer);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-shimmer { animation: none; }
 }
