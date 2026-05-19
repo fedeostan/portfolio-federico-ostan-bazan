@@ -25,7 +25,7 @@ export function TextImageSplit({
         "bg-surface flex h-[430px] w-full max-w-[340px] flex-col items-center justify-end overflow-hidden rounded-4xl p-6 md:shrink-0",
       )}
     >
-      <div className="relative h-full w-full">
+      <div className="relative w-full flex-1 min-h-0">
         <Image
           src={asset.url}
           alt={asset.alt_text ?? heading ?? ""}
