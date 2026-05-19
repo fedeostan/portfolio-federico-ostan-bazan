@@ -11,6 +11,7 @@ type DockIconButtonProps = {
   icon: LucideIcon
   href: string
   active?: boolean
+  tooltipSide?: 'top' | 'left'
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void
 }
 
@@ -19,10 +20,12 @@ export function DockIconButton({
   icon: Icon,
   href,
   active = false,
+  tooltipSide = 'top',
   onClick,
 }: DockIconButtonProps) {
   return (
     <motion.a
+      layout="position"
       href={href}
       onClick={onClick}
       aria-label={label}
@@ -41,10 +44,12 @@ export function DockIconButton({
       <Icon size={active ? 22 : 20} strokeWidth={active ? 2.25 : 1.75} />
       <span
         className={cn(
-          'pointer-events-none absolute -top-9 rounded-md border border-border bg-popover px-2 py-1',
+          'pointer-events-none absolute whitespace-nowrap rounded-md border border-border bg-popover px-2 py-1',
           'text-xs font-medium text-popover-foreground shadow-sm',
           'opacity-0 transition-opacity duration-150',
-          'group-hover:opacity-100 group-focus-visible:opacity-100'
+          'group-hover:opacity-100 group-focus-visible:opacity-100',
+          tooltipSide === 'top' && '-top-9 left-1/2 -translate-x-1/2',
+          tooltipSide === 'left' && 'right-12 top-1/2 -translate-y-1/2'
         )}
       >
         {label}
