@@ -7,7 +7,8 @@ import {
 import { z } from "zod";
 import { gateway, PRIMARY_MODEL } from "@/lib/ai/gateway";
 import { buildTools } from "@/lib/ai/tools";
-import { systemPrompt } from "@/lib/ai/prompts";
+import { systemPrompt, type RedirectTarget } from "@/lib/ai/prompts";
+import { listProjectsForRedirect } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -33,12 +34,22 @@ export async function POST(req: Request) {
   const startedAt = Date.now();
   const scopedTools = buildTools({ project_id });
 
+  let other_projects: RedirectTarget[] = [];
+  if (project_id) {
+    const { data } = await listProjectsForRedirect(project_id);
+    other_projects = (data ?? []).map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      category: row.category,
+    }));
+  }
+
   const result = streamText({
     model: gateway(PRIMARY_MODEL),
-    system: systemPrompt({ project_id, project_title }),
+    system: systemPrompt({ project_id, project_title, other_projects }),
     messages: await convertToModelMessages(messages),
     tools: scopedTools,
-    stopWhen: stepCountIs(project_id ? 4 : 6),
+    stopWhen: stepCountIs(project_id ? 3 : 6),
     providerOptions: {
       anthropic: {
         thinking: { type: "enabled", budgetTokens: 8000 },

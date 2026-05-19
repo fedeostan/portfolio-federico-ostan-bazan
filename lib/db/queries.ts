@@ -87,3 +87,13 @@ export async function listProjectsByCategory(
     .order("year", { ascending: false, nullsFirst: false })
     .limit(opts.limit ?? 20);
 }
+
+export async function listProjectsForRedirect(excludeSlug: string) {
+  const supabase = createServerClient();
+  return supabase
+    .from("projects")
+    .select("slug, title, category, summary")
+    .eq("published", true)
+    .neq("slug", excludeSlug)
+    .order("year", { ascending: false, nullsFirst: false });
+}
