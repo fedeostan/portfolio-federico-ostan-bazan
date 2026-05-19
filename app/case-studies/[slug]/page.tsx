@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CaseStudyBody } from "@/components/case-study/CaseStudyBody";
 import { CaseStudyHero } from "@/components/case-study/CaseStudyHero";
+import { ProjectChat } from "@/components/case-study/ProjectChat";
 import { createServerClient } from "@/lib/db/client";
 import { getProjectBySlug } from "@/lib/db/queries";
 import { getHeroAsset } from "@/lib/case-study/sections";
@@ -55,9 +56,12 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const heroAsset = getHeroAsset(project.project_assets);
 
   return (
-    <article className="mx-auto flex w-full max-w-[1140px] flex-col gap-12 px-6 py-12 md:px-12 lg:px-[150px] lg:py-20">
-      <CaseStudyHero project={project} heroAsset={heroAsset} />
-      <CaseStudyBody project={project} />
-    </article>
+    <>
+      <article className="mx-auto flex w-full max-w-[1140px] flex-col gap-12 px-6 py-12 md:px-12 lg:px-[150px] lg:py-20">
+        <CaseStudyHero project={project} heroAsset={heroAsset} />
+        <CaseStudyBody project={project} />
+      </article>
+      <ProjectChat projectId={project.slug} projectTitle={project.title} />
+    </>
   );
 }
