@@ -1,12 +1,12 @@
 import { HeroBackground } from "@/components/hero/HeroBackground";
-import { HeroSequence } from "@/components/hero/HeroSequence";
+import { HeroChat } from "@/components/hero/HeroChat";
 import { SectionShell } from "@/components/motion/SectionShell";
 
 export default function Home() {
   return (
     <SectionShell id="hero">
       <HeroBackground />
-      <HeroSequence />
+      <HeroChat />
     </SectionShell>
   );
 }
