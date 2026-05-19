@@ -4,10 +4,8 @@ import { useChat, type UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import Link from "next/link";
 import {
-  ChevronDown,
   ExternalLink,
   MessageCircle,
-  Minus,
   Send,
   Square,
   X,
@@ -35,8 +33,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-type DesktopState = "expanded" | "minimized" | "closed";
-
 interface ProjectChatProps {
   projectId: string;
   projectTitle: string;
@@ -44,7 +40,7 @@ interface ProjectChatProps {
 
 export function ProjectChat({ projectId, projectTitle }: ProjectChatProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [desktopState, setDesktopState] = useState<DesktopState>("expanded");
+  const [desktopOpen, setDesktopOpen] = useState(true);
   const [input, setInput] = useState("");
 
   const transport = useMemo(
@@ -100,11 +96,10 @@ export function ProjectChat({ projectId, projectTitle }: ProjectChatProps) {
   return (
     <>
       <DesktopRail
-        state={desktopState}
+        open={desktopOpen}
         projectTitle={projectTitle}
-        onMinimize={() => setDesktopState("minimized")}
-        onClose={() => setDesktopState("closed")}
-        onExpand={() => setDesktopState("expanded")}
+        onClose={() => setDesktopOpen(false)}
+        onOpen={() => setDesktopOpen(true)}
       >
         {body}
       </DesktopRail>
@@ -152,63 +147,40 @@ export function ProjectChat({ projectId, projectTitle }: ProjectChatProps) {
 // ─── Desktop rail container ────────────────────────────────────────────────
 
 interface DesktopRailProps {
-  state: DesktopState;
+  open: boolean;
   projectTitle: string;
-  onMinimize: () => void;
   onClose: () => void;
-  onExpand: () => void;
+  onOpen: () => void;
   children: React.ReactNode;
 }
 
 function DesktopRail({
-  state,
+  open,
   projectTitle,
-  onMinimize,
   onClose,
-  onExpand,
+  onOpen,
   children,
 }: DesktopRailProps) {
-  if (state === "closed") {
+  if (!open) {
     return (
       <button
         type="button"
-        onClick={onExpand}
+        onClick={onOpen}
         aria-label={`Open chat about ${projectTitle}`}
-        className="fixed top-24 right-8 z-40 hidden size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:flex"
+        className="fixed right-8 bottom-8 z-40 hidden size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:flex"
       >
-        <MessageCircle className="size-5" />
+        <MessageCircle className="size-6" />
       </button>
-    );
-  }
-
-  if (state === "minimized") {
-    return (
-      <aside
-        aria-label={`Chat about ${projectTitle} — minimized`}
-        className="pointer-events-none fixed top-24 right-8 z-40 hidden w-96 lg:block"
-      >
-        <div className="pointer-events-auto overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
-          <MinimizedHeader
-            projectTitle={projectTitle}
-            onExpand={onExpand}
-            onClose={onClose}
-          />
-        </div>
-      </aside>
     );
   }
 
   return (
     <aside
       aria-label={`Ask about ${projectTitle}`}
-      className="pointer-events-none fixed top-24 right-8 z-40 hidden h-[calc(100vh-8rem)] w-96 lg:block"
+      className="pointer-events-none fixed right-8 bottom-8 z-40 hidden h-[calc(100vh-8rem)] max-h-[640px] w-96 lg:block"
     >
       <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
-        <ChatHeader
-          projectTitle={projectTitle}
-          onMinimize={onMinimize}
-          onClose={onClose}
-        />
+        <ChatHeader projectTitle={projectTitle} onClose={onClose} />
         {children}
       </div>
     </aside>
@@ -241,10 +213,9 @@ function MobileLauncher({
 interface ChatHeaderProps {
   projectTitle: string;
   onClose: () => void;
-  onMinimize?: () => void;
 }
 
-function ChatHeader({ projectTitle, onClose, onMinimize }: ChatHeaderProps) {
+function ChatHeader({ projectTitle, onClose }: ChatHeaderProps) {
   return (
     <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
       <div className="flex min-w-0 items-center gap-2">
@@ -258,80 +229,16 @@ function ChatHeader({ projectTitle, onClose, onMinimize }: ChatHeaderProps) {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        {onMinimize ? (
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            onClick={onMinimize}
-            aria-label="Minimize chat"
-          >
-            <Minus className="size-3.5" />
-          </Button>
-        ) : null}
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          onClick={onClose}
-          aria-label="Close chat"
-        >
-          <X className="size-3.5" />
-        </Button>
-      </div>
-    </header>
-  );
-}
-
-function MinimizedHeader({
-  projectTitle,
-  onExpand,
-  onClose,
-}: {
-  projectTitle: string;
-  onExpand: () => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 px-4 py-3">
-      <button
+      <Button
         type="button"
-        onClick={onExpand}
-        className="flex min-w-0 flex-1 items-center gap-2 text-left"
-        aria-label="Expand chat"
+        size="icon-sm"
+        variant="ghost"
+        onClick={onClose}
+        aria-label="Close chat"
       >
-        <MessageCircle className="size-4 shrink-0 text-muted-foreground" />
-        <div className="flex min-w-0 flex-col">
-          <span className="text-sm font-medium leading-tight">
-            Ask about this project
-          </span>
-          <span className="line-clamp-1 text-xs text-muted-foreground">
-            {projectTitle}
-          </span>
-        </div>
-      </button>
-      <div className="flex items-center gap-1">
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          onClick={onExpand}
-          aria-label="Expand chat"
-        >
-          <ChevronDown className="size-3.5 rotate-180" />
-        </Button>
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          onClick={onClose}
-          aria-label="Close chat"
-        >
-          <X className="size-3.5" />
-        </Button>
-      </div>
-    </div>
+        <X className="size-3.5" />
+      </Button>
+    </header>
   );
 }
 
