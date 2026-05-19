@@ -6,8 +6,9 @@ import {
 } from "ai";
 import { z } from "zod";
 import { gateway, PRIMARY_MODEL } from "@/lib/ai/gateway";
-import { tools } from "@/lib/ai/tools";
-import { systemPrompt } from "@/lib/ai/prompts";
+import { buildTools } from "@/lib/ai/tools";
+import { systemPrompt, type RedirectTarget } from "@/lib/ai/prompts";
+import { listProjectsForRedirect } from "@/lib/db/queries";
 import { jobBriefSchema } from "@/lib/ingest/job-brief";
 
 export const runtime = "nodejs";
@@ -16,6 +17,7 @@ export const maxDuration = 60;
 const bodySchema = z.object({
   messages: z.array(z.any()) as z.ZodType<UIMessage[]>,
   project_id: z.string().optional(),
+  project_title: z.string().optional(),
   job_brief: jobBriefSchema.optional(),
 });
 
@@ -30,15 +32,26 @@ export async function POST(req: Request) {
     );
   }
 
-  const { messages, project_id, job_brief } = parsed;
+  const { messages, project_id, project_title, job_brief } = parsed;
   const startedAt = Date.now();
+  const scopedTools = buildTools({ project_id });
+
+  let other_projects: RedirectTarget[] = [];
+  if (project_id) {
+    const { data } = await listProjectsForRedirect(project_id);
+    other_projects = (data ?? []).map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      category: row.category,
+    }));
+  }
 
   const result = streamText({
     model: gateway(PRIMARY_MODEL),
-    system: systemPrompt({ project_id, job_brief }),
+    system: systemPrompt({ project_id, project_title, other_projects, job_brief }),
     messages: await convertToModelMessages(messages),
-    tools,
-    stopWhen: stepCountIs(6),
+    tools: scopedTools,
+    stopWhen: stepCountIs(project_id ? 3 : 6),
     providerOptions: {
       anthropic: {
         thinking: { type: "enabled", budgetTokens: 8000 },
@@ -52,6 +65,8 @@ export async function POST(req: Request) {
       }, {});
       console.log("[/api/chat]", {
         model: PRIMARY_MODEL,
+        scoped: project_id ?? null,
+        brief: job_brief ? `${job_brief.role}@${job_brief.company}` : null,
         latencyMs: Date.now() - startedAt,
         steps: steps.length,
         toolCalls: counts,

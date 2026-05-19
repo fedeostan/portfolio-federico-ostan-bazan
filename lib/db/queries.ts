@@ -38,6 +38,7 @@ export type ProjectWithRelations = ProjectRow & {
 
 export type SearchProjectsOptions = {
   category?: ProjectCategory;
+  project_id?: string;
   limit?: number;
 };
 
@@ -54,6 +55,10 @@ export async function searchProjects(
 
   if (opts.category) {
     query = query.eq("category", opts.category);
+  }
+
+  if (opts.project_id) {
+    query = query.eq("slug", opts.project_id);
   }
 
   return query.limit(opts.limit ?? 5);
@@ -81,4 +86,14 @@ export async function listProjectsByCategory(
     .eq("category", category)
     .order("year", { ascending: false, nullsFirst: false })
     .limit(opts.limit ?? 20);
+}
+
+export async function listProjectsForRedirect(excludeSlug: string) {
+  const supabase = createServerClient();
+  return supabase
+    .from("projects")
+    .select("slug, title, category, summary")
+    .eq("published", true)
+    .neq("slug", excludeSlug)
+    .order("year", { ascending: false, nullsFirst: false });
 }
