@@ -38,6 +38,7 @@ export type ProjectWithRelations = ProjectRow & {
 
 export type SearchProjectsOptions = {
   category?: ProjectCategory;
+  project_id?: string;
   limit?: number;
 };
 
@@ -54,6 +55,10 @@ export async function searchProjects(
 
   if (opts.category) {
     query = query.eq("category", opts.category);
+  }
+
+  if (opts.project_id) {
+    query = query.eq("slug", opts.project_id);
   }
 
   return query.limit(opts.limit ?? 5);

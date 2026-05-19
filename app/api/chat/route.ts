@@ -6,7 +6,7 @@ import {
 } from "ai";
 import { z } from "zod";
 import { gateway, PRIMARY_MODEL } from "@/lib/ai/gateway";
-import { tools } from "@/lib/ai/tools";
+import { buildTools } from "@/lib/ai/tools";
 import { systemPrompt } from "@/lib/ai/prompts";
 
 export const runtime = "nodejs";
@@ -15,6 +15,7 @@ export const maxDuration = 60;
 const bodySchema = z.object({
   messages: z.array(z.any()) as z.ZodType<UIMessage[]>,
   project_id: z.string().optional(),
+  project_title: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -28,15 +29,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const { messages, project_id } = parsed;
+  const { messages, project_id, project_title } = parsed;
   const startedAt = Date.now();
+  const scopedTools = buildTools({ project_id });
 
   const result = streamText({
     model: gateway(PRIMARY_MODEL),
-    system: systemPrompt({ project_id }),
+    system: systemPrompt({ project_id, project_title }),
     messages: await convertToModelMessages(messages),
-    tools,
-    stopWhen: stepCountIs(6),
+    tools: scopedTools,
+    stopWhen: stepCountIs(project_id ? 4 : 6),
     providerOptions: {
       anthropic: {
         thinking: { type: "enabled", budgetTokens: 8000 },
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
       }, {});
       console.log("[/api/chat]", {
         model: PRIMARY_MODEL,
+        scoped: project_id ?? null,
         latencyMs: Date.now() - startedAt,
         steps: steps.length,
         toolCalls: counts,
