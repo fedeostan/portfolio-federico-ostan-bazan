@@ -33,7 +33,11 @@ function getClient(): Firecrawl {
   return client
 }
 
-function translateSdkError(err: SdkError, fallback: IngestError['kind']): IngestError {
+function translateSdkError(
+  err: SdkError,
+  fallback: IngestError['kind'],
+  subject: 'url' | 'file',
+): IngestError {
   if (err.status === 429) {
     return new IngestError(
       'Firecrawl rate limit reached. Try again in a moment.',
@@ -41,10 +45,24 @@ function translateSdkError(err: SdkError, fallback: IngestError['kind']): Ingest
       429,
     )
   }
-  if (err.status === 401 || err.status === 403) {
-    return new IngestError('Firecrawl rejected the API key.', 'missing-key', 503)
+  // 401/403 from Firecrawl can mean either an invalid platform key OR that the
+  // target site rejects the scraper (e.g. LinkedIn). Without an auth-failure
+  // marker from the SDK we can't reliably tell them apart, so we default to the
+  // per-resource explanation — that's the far more common case once a key is
+  // configured at all. A genuinely missing key is caught upstream in getClient().
+  if (subject === 'url') {
+    return new IngestError(
+      `Couldn't read that URL (${err.status ?? 'network error'}). ` +
+        'Many job boards (LinkedIn, etc.) block scrapers — try a company careers page, Greenhouse, or Lever URL instead.',
+      'scrape-failed',
+      502,
+    )
   }
-  return new IngestError(err.message || 'Firecrawl request failed.', fallback)
+  return new IngestError(
+    err.message || 'Could not parse the file.',
+    fallback,
+    502,
+  )
 }
 
 export async function scrapeUrl(url: string): Promise<string> {
@@ -53,7 +71,7 @@ export async function scrapeUrl(url: string): Promise<string> {
     doc = await getClient().scrape(url, { formats: ['markdown'], onlyMainContent: true })
   } catch (err) {
     if (err instanceof IngestError) throw err
-    if (err instanceof SdkError) throw translateSdkError(err, 'scrape-failed')
+    if (err instanceof SdkError) throw translateSdkError(err, 'scrape-failed', 'url')
     throw new IngestError(
       err instanceof Error ? err.message : 'Scrape failed.',
       'scrape-failed',
@@ -72,7 +90,7 @@ export async function parseFile(file: ParseFile): Promise<string> {
     doc = await getClient().parse(file, { formats: ['markdown'] })
   } catch (err) {
     if (err instanceof IngestError) throw err
-    if (err instanceof SdkError) throw translateSdkError(err, 'parse-failed')
+    if (err instanceof SdkError) throw translateSdkError(err, 'parse-failed', 'file')
     throw new IngestError(
       err instanceof Error ? err.message : 'File parse failed.',
       'parse-failed',

@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type ClipboardEvent as ReactClipboardEvent,
+  type DragEvent as ReactDragEvent,
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
@@ -54,6 +55,8 @@ export function AIChatInput({
   const [thinkActive, setThinkActive] = useState(false)
   const [deepSearchActive, setDeepSearchActive] = useState(false)
   const [inputValue, setInputValue] = useState('')
+  const [dragActive, setDragActive] = useState(false)
+  const dragDepthRef = useRef(0)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -107,13 +110,53 @@ export function AIChatInput({
     const pasted = event.clipboardData.getData('text')
     if (!pasted) return
     const match = pasted.match(URL_REGEX)
-    if (match) onPasteUrl(match[0])
+    if (!match) return
+    // Don't let the URL land in the input — the confirm row above is the only
+    // place it lives until the user accepts or dismisses. Prevents the URL from
+    // being accidentally submitted as a chat message if ingest fails.
+    event.preventDefault()
+    onPasteUrl(match[0])
   }
 
   const handleAttachClick = (event: ReactMouseEvent) => {
     event.stopPropagation()
     if (!onAttachFile || attachDisabled) return
     fileInputRef.current?.click()
+  }
+
+  // Drag-and-drop: enter/leave events fire on every child too, so we count depth
+  // to avoid the overlay flickering when the cursor crosses an inner element.
+  const dragsEnabled = Boolean(onAttachFile) && !attachDisabled
+
+  const handleDragEnter = (event: ReactDragEvent<HTMLDivElement>) => {
+    if (!dragsEnabled) return
+    if (!Array.from(event.dataTransfer.types).includes('Files')) return
+    event.preventDefault()
+    dragDepthRef.current += 1
+    setDragActive(true)
+  }
+
+  const handleDragOver = (event: ReactDragEvent<HTMLDivElement>) => {
+    if (!dragsEnabled) return
+    if (!Array.from(event.dataTransfer.types).includes('Files')) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+
+  const handleDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
+    if (!dragsEnabled) return
+    event.preventDefault()
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+    if (dragDepthRef.current === 0) setDragActive(false)
+  }
+
+  const handleDrop = (event: ReactDragEvent<HTMLDivElement>) => {
+    if (!dragsEnabled) return
+    event.preventDefault()
+    dragDepthRef.current = 0
+    setDragActive(false)
+    const file = event.dataTransfer.files?.[0]
+    if (file && onAttachFile) onAttachFile(file)
   }
 
   const stopBubble = (event: ReactMouseEvent) => event.stopPropagation()
@@ -197,7 +240,11 @@ export function AIChatInput({
       ref={wrapperRef}
       role="group"
       aria-label="Chat input"
-      className={cn('bg-surface text-foreground w-full overflow-hidden rounded-4xl', className)}
+      className={cn(
+        'bg-surface text-foreground w-full overflow-hidden rounded-4xl transition-shadow',
+        dragActive && 'ring-foreground/30 ring-2 ring-offset-2',
+        className,
+      )}
       variants={containerVariants}
       animate={isExpanded ? 'expanded' : 'collapsed'}
       initial="collapsed"
@@ -205,6 +252,10 @@ export function AIChatInput({
         setIsActive(true)
         inputRef.current?.focus()
       }}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       <div className="flex w-full flex-col">
         <div className="flex items-center gap-2 p-3">

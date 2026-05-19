@@ -33,7 +33,7 @@ export function systemPrompt({
     : "";
 
   const briefContext = job_brief
-    ? `\n\n${briefAsSystemContext(job_brief)}\n\nWhen relevant, surface projects from Federico's portfolio that map to the brief's problems and outcomes — but stay grounded in tool results.`
+    ? `\n\n${briefAsSystemContext(job_brief)}\n\nBRIEF-MODE WORKFLOW (overrides the default workflow for this turn):\n1. Assume the visitor is evaluating Federico for this role. Do not say "I can't open URLs" — the brief above is the URL's contents, already extracted.\n2. Call search_projects using a query built from the brief's "Problems the role must solve" — not just the user's literal question.\n3. Call show_project_card on the 1–3 strongest matches.\n4. Write ONE short paragraph (≤4 sentences) that explicitly connects Federico's strongest work to the brief's role, problems, and outcomes. Name the company from the brief at least once.\n5. End with one concrete question that helps the visitor go deeper (e.g. "Want me to dig into the metrics on <project>?").`
     : "";
 
   return [BASE_PERSONA, GROUNDING_RULES, WORKFLOW, TONE].join("\n\n") + focus + briefContext;

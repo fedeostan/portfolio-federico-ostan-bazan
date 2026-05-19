@@ -56,17 +56,17 @@ export async function extractJobBrief(markdown: string): Promise<JobBrief> {
 
 export function briefAsSystemContext(brief: JobBrief): string {
   const lines = [
-    'Attached job brief (treat as the visitor\'s hiring context, weigh it when surfacing projects):',
+    'ATTACHED JOB BRIEF — this is structured data normalized from the visitor\'s pasted URL or uploaded JD. Treat it as authoritative hiring context.',
     `- Role: ${brief.role}`,
     `- Company: ${brief.company}`,
   ]
   if (brief.seniority) lines.push(`- Seniority: ${brief.seniority}`)
   if (brief.problems.length) {
-    lines.push('- Problems to solve:')
+    lines.push('- Problems the role must solve:')
     brief.problems.forEach((p) => lines.push(`  • ${p}`))
   }
   if (brief.outcomes.length) {
-    lines.push('- Outcomes wanted:')
+    lines.push('- Outcomes the company wants:')
     brief.outcomes.forEach((o) => lines.push(`  • ${o}`))
   }
   return lines.join('\n')
