@@ -2,6 +2,12 @@ import { z } from 'zod'
 
 import { IngestError, parseFile, scrapeUrl } from '@/lib/ingest/firecrawl'
 import { extractJobBrief, type JobBrief } from '@/lib/ingest/job-brief'
+import {
+  ingestLimiter,
+  logRateLimitHit,
+  rateLimitResponse,
+} from '@/lib/api/rate-limit'
+import { botBlockedResponse, logBotBlock, verifyBotId } from '@/lib/api/bot-id'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -34,6 +40,18 @@ function badRequest(message: string): Response {
 }
 
 export async function POST(req: Request) {
+  const limit = await ingestLimiter.limit(req)
+  if (!limit.success) {
+    logRateLimitHit('ingest-job', req, limit)
+    return rateLimitResponse(limit)
+  }
+
+  const bot = await verifyBotId()
+  if (bot.isBot) {
+    logBotBlock('ingest-job', req)
+    return botBlockedResponse()
+  }
+
   const contentType = req.headers.get('content-type') ?? ''
 
   try {

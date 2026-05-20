@@ -1,4 +1,10 @@
 import { transcribeWithGroq } from '@/lib/voice/groq-client'
+import {
+  logRateLimitHit,
+  rateLimitResponse,
+  transcribeLimiter,
+} from '@/lib/api/rate-limit'
+import { botBlockedResponse, logBotBlock, verifyBotId } from '@/lib/api/bot-id'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -6,6 +12,18 @@ export const maxDuration = 30
 const MAX_BYTES = 5 * 1024 * 1024
 
 export async function POST(req: Request) {
+  const limit = await transcribeLimiter.limit(req)
+  if (!limit.success) {
+    logRateLimitHit('transcribe', req, limit)
+    return rateLimitResponse(limit)
+  }
+
+  const bot = await verifyBotId()
+  if (bot.isBot) {
+    logBotBlock('transcribe', req)
+    return botBlockedResponse()
+  }
+
   let form: FormData
   try {
     form = await req.formData()

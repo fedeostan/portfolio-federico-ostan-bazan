@@ -10,6 +10,12 @@ import { buildTools } from "@/lib/ai/tools";
 import { systemPrompt, type RedirectTarget } from "@/lib/ai/prompts";
 import { listProjectsForRedirect } from "@/lib/db/queries";
 import { jobBriefSchema } from "@/lib/ingest/job-brief";
+import {
+  chatLimiter,
+  logRateLimitHit,
+  rateLimitResponse,
+} from "@/lib/api/rate-limit";
+import { botBlockedResponse, logBotBlock, verifyBotId } from "@/lib/api/bot-id";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -22,6 +28,18 @@ const bodySchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limit = await chatLimiter.limit(req);
+  if (!limit.success) {
+    logRateLimitHit("chat", req, limit);
+    return rateLimitResponse(limit);
+  }
+
+  const bot = await verifyBotId();
+  if (bot.isBot) {
+    logBotBlock("chat", req);
+    return botBlockedResponse();
+  }
+
   let parsed: z.infer<typeof bodySchema>;
   try {
     parsed = bodySchema.parse(await req.json());
