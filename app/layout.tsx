@@ -68,12 +68,12 @@ export default function RootLayout({
       lang="en"
       className={`light ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
+      <head suppressHydrationWarning>
         <BotIdClient protect={protectedRoutes} />
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <a
-          href="#main"
+          href="#section-ai"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg focus-visible:ring-2 focus-visible:ring-ring"
         >
           Skip to content
