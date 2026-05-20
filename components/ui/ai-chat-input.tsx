@@ -394,7 +394,7 @@ export function AIChatInput({
                           variants={letterVariants}
                           style={{ display: 'inline-block' }}
                         >
-                          {char === ' ' ? ' ' : char}
+                          {char === ' ' ? ' ' : char}
                         </motion.span>
                       ))}
                     </motion.span>
