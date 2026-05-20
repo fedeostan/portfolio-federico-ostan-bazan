@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   searchProjects,
   getProjectBySlug,
+  listPublishedProjects,
   PROJECT_CATEGORIES,
 } from "@/lib/db/queries";
 
@@ -37,7 +38,7 @@ export function buildTools(opts: BuildToolsOptions = {}) {
     }
   }
 
-  return {
+  const baseTools = {
     search_projects: tool({
       description: scopedId
         ? `Search within the current case study ("${scopedId}") only. Use a focused query to surface this project's slug, title, summary, category, tech_stack, role, year.`
@@ -89,6 +90,23 @@ export function buildTools(opts: BuildToolsOptions = {}) {
         const result = await getProjectBySlug(slug);
         const data = unwrap(result, "show_project_card");
         return { ...data, highlight };
+      },
+    }),
+  };
+
+  if (scopedId) return baseTools;
+
+  return {
+    ...baseTools,
+    list_published_projects: tool({
+      description:
+        "Last-resort catalog enumerator. Use ONLY in BRIEF-MODE when search_projects has returned zero results on TWO different queries (the brief's problems, then the brief's role). Returns the most recent published projects with no text filter. Never use as a first call — the model must attempt search first.",
+      inputSchema: z.object({
+        limit: z.number().int().min(1).max(10).default(6),
+      }),
+      execute: async ({ limit }) => {
+        const result = await listPublishedProjects({ limit });
+        return unwrap(result, "list_published_projects");
       },
     }),
   };
