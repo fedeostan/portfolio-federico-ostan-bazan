@@ -1,4 +1,5 @@
 import { config as loadEnv } from "dotenv";
+import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile, stat } from "node:fs/promises";
 import { resolve, join, extname } from "node:path";
 
@@ -79,6 +80,7 @@ async function uploadSlug(slug: string, force: boolean): Promise<boolean> {
     const contentType = MIME_BY_EXT[ext];
 
     const body = await readFile(localPath);
+    const versionHash = createHash("sha1").update(body).digest("hex").slice(0, 10);
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
@@ -99,7 +101,7 @@ async function uploadSlug(slug: string, force: boolean): Promise<boolean> {
     }
 
     const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
-    map[filename] = pub.publicUrl;
+    map[filename] = `${pub.publicUrl}?v=${versionHash}`;
 
     const tag = uploadError ? "skip" : force ? "force" : "ok";
     console.log(`  ✓ ${slug}/${filename} [${tag}]`);

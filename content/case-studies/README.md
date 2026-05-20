@@ -53,14 +53,18 @@ Don't worry about structure or polish. The `direct-response-copy` skill and `Web
 
 ## Images
 
-Drop files in `images/` with these conventional names. Targets are guidance — Next/Image handles delivery; aiming for these dimensions just avoids awkward crops.
+Drop files in `images/` with these conventional names. The **container aspect ratio** comes from the actual component CSS — match it or get awkward crops. Pixel sizes below are 2× retina targets.
 
-| Filename pattern | Asset type | Where it renders | Target size |
-|---|---|---|---|
-| `hero.{png\|jpg\|webp}` | `hero` | full-width hero at top of detail page | 1600×900 |
-| `cover.{png\|jpg\|webp}` | (sets `projects.og_image`) | home grid card + social/OG fallback | 1200×630 |
-| `gallery-NN.{ext}` | `screenshot` | gallery block + image+text pairings | 1200×800 |
-| `process-NN.{ext}` | `screenshot` | paired into image+text sections by `order` | 1200×800 |
+| Filename pattern | Asset type | Where it renders | Container | 2× target |
+|---|---|---|---|---|
+| `hero.{png\|jpg\|webp}` | `hero` | `CaseStudyHero` — wide letterbox band at top of detail page | **2.5:1 ultra-wide** | **2280×914** |
+| `cover.{png\|jpg\|webp}` | sets `projects.og_image` — drives the **home grid card** visual (not social/OG; that's dynamic via `app/case-studies/[slug]/opengraph-image.tsx`) | **0.79:1 portrait** (34:43 — same as process slots) | **680×860** |
+| `process-NN.{ext}` | `screenshot` | `TextImageSplit` — paired with `image+text` sections by `order`. The section heading is **overlaid at the bottom of the image** | **0.79:1 portrait** (phone-mockup slot) | **680×860** |
+| `gallery-NN.{ext}` | `screenshot` | `Gallery` block — full-width below text | **~1.58:1 landscape** | **2280×1440** |
+
+**The portrait slot is intentional.** `TextImageSplit` (`components/case-study/TextImageSplit.tsx`) is designed for phone-frame mockups with the section title rendered inside the image at the bottom. For desktop/laptop screens, letterbox them inside a portrait frame, or move the asset to a `gallery` section instead.
+
+**Metrics formatting matters.** `MetricsRow` renders headline-style — keep exactly **3 metrics**, each value ≤ 2 words / 12 characters (`"2"`, `"44%"`, `"D30 58%"`, `"Holdings-only"`). Sentences blow out the layout.
 
 Supported extensions: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.svg`, `.avif`, `.mp4`, `.webm`.
 

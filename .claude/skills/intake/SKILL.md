@@ -12,6 +12,7 @@ Capture raw dictation about a project, generate the full case-study scaffold, an
 - Fede invokes `/intake`
 - Fede says "let's start intake", "intake mode", "dump a case study", "I want to dictate"
 - Fede pastes a raw text block that's clearly describing a project after asking for white-glove processing
+- Fede pastes a **file path to a markdown brief** (typical: `portfolio-cases/<slug>.md` at the repo root) — read the file as the dump
 
 ## Pre-flight (refuse if any fail)
 
@@ -32,13 +33,22 @@ Capture raw dictation about a project, generate the full case-study scaffold, an
 
 ### Phase 1: Capture
 
-Say one short line: *"Ready. Dump the raw text. Say 'next project' or 'that's all' when done."*
+**Path-mode (preferred):** if Fede pastes a path to a markdown file (e.g. `portfolio-cases/<slug>.md`), read it directly. No chat dump needed.
 
-Accept any amount of text. Do not interrupt unless Fede asks a question. The dump becomes `brief.md` **verbatim** — no edits, no cleanup, no reformatting.
+**Dictation-mode:** otherwise, say one short line: *"Ready. Dump the raw text. Say 'next project' or 'that's all' when done."* Accept any amount of text.
+
+Either way, the dump becomes `brief.md` **verbatim** — no edits, no cleanup, no reformatting. If the source had YAML frontmatter, it stays in brief.md as the source of truth; meta.yaml is derived from it but does not replace it.
 
 ### Phase 2: Extract slug + meta
 
-From the dump, infer:
+**Prefer YAML frontmatter** if the source has one (the `portfolio-cases/*.md` briefs do). Map:
+- frontmatter `title` → `title`
+- frontmatter `role` (typically `"<role>, <client>"`) → split on the last `, ` into `role` and `client`
+- frontmatter `period` (e.g. `2026-02 – present`) → first year token → `year`
+- frontmatter `stack` (comma list) → `tech_stack` (canonicalize spellings via web search if unsure)
+- product/project name → `slug` (filename of the markdown if it matches; otherwise kebab-cased title)
+
+Otherwise infer from the dump:
 
 | Field | How |
 |---|---|
@@ -83,31 +93,35 @@ Write `content/case-studies/<slug>/meta.yaml` = extracted fields.
 
 ### Phase 5: Image drop instructions
 
-Print this exact block (substitute `<slug>`):
+Print this exact block (substitute `<slug>` and the correct worktree path). Aspect ratios come from the actual component CSS — these are **not** suggestions.
 
 ```
 Drop images into:
 
-  /Users/federicoostanbazan/portfolio-issue-67/content/case-studies/<slug>/images/
+  <worktree-path>/content/case-studies/<slug>/images/
 
-Required filenames (use these exactly):
-  • hero.png       — full-width hero, ~1600×900
-  • cover.png      — home grid card / social preview, ~1200×630
-  • gallery-01.png — first gallery shot, ~1200×800
+Filenames + shapes (match exactly):
+
+  • hero.png       2.5:1 ultra-wide panorama   2280×914   → CaseStudyHero band
+  • cover.png      0.79:1 portrait (34:43)     680×860    → home grid card visual
+  • process-01.png 0.79:1 portrait (34:43)     680×860    → pairs with "image+text" section, order 30
+                                                            (heading overlays the bottom ~120px — leave a dark/blank band)
+  • process-02.png 0.79:1 portrait (34:43)     680×860    → pairs with image+text, order 40 (same bottom-band rule)
 
 Optional:
-  • gallery-02.png, gallery-03.png… — more gallery shots
-  • process-01.png, process-02.png… — pairs with image+text sections
+  • gallery-01.png … gallery-NN.png           1.58:1 landscape   2280×1440   → unpaired gallery block
+
+The cover, process-01, and process-02 are the SAME canvas shape — design one phone-frame template and swap screens.
 
 Extensions: .png .jpg .jpeg .webp .gif .svg .avif
 
 Reply "images in <slug>" or "process <slug>" when ready.
 ```
 
-Then open the folder for Fede:
+Then open the folder for Fede (use the actual worktree path):
 
 ```bash
-open /Users/federicoostanbazan/portfolio-issue-67/content/case-studies/<slug>/images/
+open <worktree-path>/content/case-studies/<slug>/images/
 ```
 
 **Stop here.** Do not proceed without images.
@@ -116,29 +130,39 @@ open /Users/federicoostanbazan/portfolio-issue-67/content/case-studies/<slug>/im
 
 When Fede says "images in `<slug>`" / "process `<slug>`" / "ready":
 
-1. Verify at least `hero` and `cover` exist:
-   ```bash
-   ls content/case-studies/<slug>/images/
-   ```
-   Refuse if `hero.*` or `cover.*` is missing — tell Fede which one.
+1. **Normalize filenames.** Common typos to auto-rename (do this silently, don't ask):
+   - `galery-*` → `gallery-*` (single-`l`)
+   - `heroe.*` → `hero.*`
+   - `proces-*` → `process-*`
+   - `cover-*` ambiguous with `cover.*` → ask Fede which is the card
+   Also delete `.DS_Store` (Finder junk).
 
-2. Upload to Supabase Storage:
+2. **Verify dimensions** with `file content/case-studies/<slug>/images/*.png` (or jpg/etc). Compare against the spec:
+   - hero: 2.5:1 ± 5% — warn if off
+   - cover / process-NN: 0.79:1 ± 5% — warn if off
+   - gallery-NN: ~1.5:1 landscape — informational
+   If hero or any process is wildly off-aspect, **stop and tell Fede** rather than uploading bad assets.
+
+3. **Verify minimums.** `hero.png` AND `cover.png` must exist. Process and gallery files are optional — case-study.ts handles missing ones via warn-and-skip in the seeder. If hero or cover is missing, stop and tell Fede which one.
+
+4. **Upload to Supabase Storage** (always `--force` — URLs are content-hashed, so it's safe):
    ```bash
-   pnpm assets:upload <slug>
+   pnpm assets:upload <slug> --force
    ```
 
-3. Seed the DB:
+5. **Seed the DB**:
    ```bash
    pnpm db:seed
    ```
 
-4. Verify:
-   - Start `pnpm dev` if not running
-   - Open `http://localhost:3000/case-studies/<slug>` — confirm hero, sections, gallery render
-   - Open `http://localhost:3000` — card appears in correct category section
-   - Confirm AI brief mode can answer "tell me about `<slug>`" via the dock contact
+6. **Verify on localhost**:
+   - If `pnpm dev` is not running, start it.
+   - If it IS running and you just changed image content, **restart it** so Next/Image picks up the new URLs cleanly (it caches optimized variants by URL — content-hash query strings bust this, but a restart guarantees a clean slate).
+   - `curl -sS http://localhost:3000/case-studies/<slug>` and grep for the project title, the new image hashes (`\?v=[a-f0-9]{10}`), and 2–3 distinctive content phrases.
+   - `curl -sS http://localhost:3000/` and grep for the project title to confirm the home grid renders.
+   - Optionally: spot-check FTS by writing a quick `tsx` script that queries `projects.search_tsv` for keywords from the brief.
 
-5. Report back: 2-line summary + URLs to verify.
+7. **Report back**: a 2-line summary with the localhost URL and a one-sentence note on what to eyeball (hero composition, metrics formatting, gallery count). Ask Fede to hard-refresh (`⌘⇧R`) since browser caches predate the new hashes only on a first visit per session.
 
 ### Phase 7: Continue or finish
 

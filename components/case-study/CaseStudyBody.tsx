@@ -94,6 +94,16 @@ export function CaseStudyBody({ project, className }: CaseStudyBodyProps) {
   const sections = sortSections(project.project_sections);
   const galleryAssets = getGalleryAssets(project.project_assets);
 
+  const pairedAssetIds = new Set(
+    sections
+      .filter((s) => normalizeSectionType(s.section_type) === "image+text")
+      .map((s) => assetForImageTextSection(s, sections, galleryAssets)?.id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const unpairedGalleryAssets = galleryAssets.filter(
+    (a) => !pairedAssetIds.has(a.id),
+  );
+
   return (
     <div className={cn("flex flex-col gap-12", className)}>
       {sections.map((section) => {
@@ -121,7 +131,7 @@ export function CaseStudyBody({ project, className }: CaseStudyBodyProps) {
               <GallerySection
                 key={section.id}
                 section={section}
-                assets={galleryAssets}
+                assets={unpairedGalleryAssets}
               />
             );
           case "text":

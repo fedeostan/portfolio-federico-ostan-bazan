@@ -88,30 +88,24 @@ async function loadProject(slug: string): Promise<LoadedProject | null> {
   return { slug, project, assetMap };
 }
 
-function resolveAssetUrl(
-  slug: string,
-  file: string,
-  map: ResolvedAssetMap,
-): string {
-  const url = map[file];
-  if (!url) {
-    throw new Error(
-      `${slug}: case-study.ts references "${file}" but assets.json has no entry for it. ` +
-        `Run \`pnpm assets:upload ${slug}\` (or add the file to images/) and retry.`,
-    );
-  }
-  return url;
-}
-
 function buildAssetInserts(
   slug: string,
   assets: SeedAsset[],
   map: ResolvedAssetMap,
 ): Omit<AssetInsert, "project_id">[] {
-  return assets.map(({ file, ...rest }) => ({
-    ...rest,
-    url: resolveAssetUrl(slug, file, map),
-  }));
+  const inserts: Omit<AssetInsert, "project_id">[] = [];
+  for (const { file, ...rest } of assets) {
+    const url = map[file];
+    if (!url) {
+      console.warn(
+        `  ⚠ ${slug}: asset "${file}" not in assets.json — skipping. ` +
+          `Drop it in images/ and re-run \`pnpm assets:upload ${slug}\` to include it.`,
+      );
+      continue;
+    }
+    inserts.push({ ...rest, url });
+  }
+  return inserts;
 }
 
 async function main() {
@@ -148,9 +142,12 @@ async function main() {
   for (const { slug, project, assetMap } of loaded) {
     const { sections, assets, og_image_file, ...rest } = project;
 
-    const og_image = og_image_file
-      ? resolveAssetUrl(slug, og_image_file, assetMap)
-      : null;
+    const og_image = og_image_file ? (assetMap[og_image_file] ?? null) : null;
+    if (og_image_file && !og_image) {
+      console.warn(
+        `  ⚠ ${slug}: og_image "${og_image_file}" not in assets.json — using dynamic OG fallback.`,
+      );
+    }
 
     const { data: inserted, error: projectError } = await supabase
       .from("projects")
