@@ -21,8 +21,13 @@ export function SectionShellWithHeader({
   children,
   className,
 }: SectionShellWithHeaderProps) {
+  const headingId = `${id}-heading`;
   return (
-    <SectionShell id={id} className={cn("bg-background", className)}>
+    <SectionShell
+      id={id}
+      className={cn("bg-background", className)}
+      aria-labelledby={headingId}
+    >
       <div className="flex w-full max-w-[1796px] flex-col gap-10 py-16 md:gap-[49px] md:py-24">
         <header
           className={cn(
@@ -30,7 +35,10 @@ export function SectionShellWithHeader({
             HORIZONTAL_PADDING,
           )}
         >
-          <h2 className="text-foreground text-2xl leading-8 font-semibold">
+          <h2
+            id={headingId}
+            className="text-foreground text-2xl leading-8 font-semibold"
+          >
             {title}
           </h2>
           <p className="text-muted-foreground text-base leading-6 font-medium">

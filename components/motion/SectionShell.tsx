@@ -7,6 +7,8 @@ interface SectionShellProps {
   className?: string;
   id?: string;
   as?: "section" | "div" | "article";
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
 }
 
 export function SectionShell({
@@ -14,12 +16,17 @@ export function SectionShell({
   className,
   id,
   as: Tag = "section",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
 }: SectionShellProps) {
   return (
     <Tag
       id={id}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      tabIndex={-1}
       className={cn(
-        "relative grid h-svh w-full snap-start snap-always scroll-mt-0 place-items-center",
+        "relative grid h-svh w-full snap-start snap-always scroll-mt-0 place-items-center focus:outline-none",
         className,
       )}
     >
