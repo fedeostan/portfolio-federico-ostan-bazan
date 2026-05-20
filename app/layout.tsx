@@ -1,8 +1,16 @@
 import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
+import { BotIdClient } from 'botid/client'
 import './globals.css'
 import { BottomDock } from '@/components/nav/BottomDock'
 import { Toaster } from '@/components/ui/sonner'
+
+const protectedRoutes = [
+  { path: '/api/chat', method: 'POST' },
+  { path: '/api/transcribe', method: 'POST' },
+  { path: '/api/ingest-job', method: 'POST' },
+  { path: '/api/leads', method: 'POST' },
+]
 
 const inter = Inter({
   variable: '--font-sans',
@@ -31,6 +39,9 @@ export default function RootLayout({
       lang="en"
       className={`light ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <BotIdClient protect={protectedRoutes} />
+      </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         {children}
         <BottomDock />
