@@ -11,6 +11,7 @@ The full prose workflow lives in `CONTRIBUTING.md` at the repo root. Read it onc
 | When | Skill | What it does |
 |---|---|---|
 | Start work on an issue | `.claude/skills/work-on-issue` (or `/work-on-issue N`) | Checks deps, locks the issue, creates a worktree off fresh `origin/main`, copies env, installs, starts coding |
+| Dump dictation for a case study | `.claude/skills/intake` (or `/intake`) | Captures raw text, generates `content/case-studies/<slug>/` folder + brief.md + meta.yaml + case-study.ts, prints exact image-drop path. Runs only inside a worktree. |
 | Implementation finished | `.claude/skills/qa-handoff` (or `/qa-handoff`) | Runs typecheck + lint + build, commits, opens PR, prints the **FEDE QA** block in chat |
 | Fede replies `approved` | `.claude/skills/ship-it` (or `/ship-it`) | Squash-merges, deletes branch, flips labels, cascades unblocks, removes worktree, syncs primary checkout |
 
