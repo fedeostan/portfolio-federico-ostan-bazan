@@ -2,10 +2,28 @@ import { NextResponse } from "next/server";
 
 import { createBrowserClient } from "@/lib/db/client";
 import { leadSchema } from "@/lib/db/leads";
+import {
+  leadsLimiter,
+  logRateLimitHit,
+  rateLimitResponse,
+} from "@/lib/api/rate-limit";
+import { botBlockedResponse, logBotBlock, verifyBotId } from "@/lib/api/bot-id";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const limit = await leadsLimiter.limit(req);
+  if (!limit.success) {
+    logRateLimitHit("leads", req, limit);
+    return rateLimitResponse(limit);
+  }
+
+  const bot = await verifyBotId();
+  if (bot.isBot) {
+    logBotBlock("leads", req);
+    return botBlockedResponse();
+  }
+
   let body: unknown;
   try {
     body = await req.json();

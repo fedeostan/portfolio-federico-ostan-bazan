@@ -8,6 +8,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 import { ChatErrorCard } from "@/components/hero/ChatErrorCard";
 import { NewQuestionButton } from "@/components/hero/NewQuestionButton";
@@ -42,6 +43,11 @@ export function ChatExperience({
     transport,
     onError: (err) => {
       console.error("[chat]", err);
+      if (err.message.includes("429") || /rate.?limit/i.test(err.message)) {
+        toast("Slow down — please wait a minute.", {
+          description: "You're sending messages faster than I can keep up.",
+        });
+      }
     },
   });
 
