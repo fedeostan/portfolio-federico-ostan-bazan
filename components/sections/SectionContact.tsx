@@ -1,9 +1,13 @@
 import { LetsTalkAnimation } from "@/components/contact/LetsTalkAnimation";
 import { SectionShell } from "@/components/motion/SectionShell";
 
-export function SectionContact() {
+type SectionContactProps = {
+  id?: string;
+};
+
+export function SectionContact({ id = "section-contact" }: SectionContactProps) {
   return (
-    <SectionShell id="section-contact" className="bg-background px-6">
+    <SectionShell id={id} className="bg-background px-6">
       <LetsTalkAnimation
         portrait={<ContactPortrait />}
         idleText={<WhoIAmCopy />}
