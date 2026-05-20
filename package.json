@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "tokens:lint": "design.md lint design.md",
-    "db:seed": "tsx scripts/seed-dev.ts"
+    "db:seed": "tsx scripts/seed-dev.ts",
+    "assets:upload": "tsx scripts/upload-assets.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.115",
