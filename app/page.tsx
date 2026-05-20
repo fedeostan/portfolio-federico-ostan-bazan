@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default function Home() {
   return (
     <HomeScrollSnap>
-      <SectionShell id="hero">
+      <SectionShell id="hero" aria-label="Hero">
         <HeroBackground />
         <HeroChat />
       </SectionShell>

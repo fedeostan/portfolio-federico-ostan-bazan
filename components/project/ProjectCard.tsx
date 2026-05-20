@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -34,11 +35,12 @@ export function ProjectCard({
     >
       {hasImage ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={og_image as string}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-(--duration-slow) ease-(--ease-standard) group-hover/card:scale-105"
+            fill
+            sizes="(min-width: 1024px) 360px, 320px"
+            className="object-cover object-center transition-transform duration-(--duration-slow) ease-(--ease-standard) group-hover/card:scale-105"
           />
           <div
             aria-hidden

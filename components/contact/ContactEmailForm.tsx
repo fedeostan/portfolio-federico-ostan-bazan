@@ -10,6 +10,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
@@ -114,6 +115,7 @@ export function ContactEmailForm({ onBack, onClose }: ContactEmailFormProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel className="sr-only">Your email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
@@ -131,6 +133,7 @@ export function ContactEmailForm({ onBack, onClose }: ContactEmailFormProps) {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel className="sr-only">Your message</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Add a note"
