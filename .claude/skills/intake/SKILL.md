@@ -1,6 +1,6 @@
 ---
 name: intake
-description: Use when Fede invokes /intake, says "let's start intake", "intake mode", "dump a case study", or pastes a raw block describing a project. Captures dictation, generates the folder + brief.md + meta.yaml + case-study.ts, then tells Fede the exact path to drop images. Refuses outside the case-study worktree.
+description: Use when Fede invokes /intake, says "let's start intake", "intake mode", "dump a case study", or pastes a raw block describing a project. Bootstraps a content-intake worktree if not already in one, captures dictation, generates the folder + brief.md + meta.yaml + case-study.ts, then tells Fede the exact path to drop images.
 ---
 
 # Skill: intake
@@ -14,20 +14,68 @@ Capture raw dictation about a project, generate the full case-study scaffold, an
 - Fede pastes a raw text block that's clearly describing a project after asking for white-glove processing
 - Fede pastes a **file path to a markdown brief** (typical: `portfolio-cases/<slug>.md` at the repo root) — read the file as the dump
 
-## Pre-flight (refuse if any fail)
+## Pre-flight
 
-1. **Must be in the case-study worktree**
-   - `pwd` must end in a worktree path (e.g. `…/portfolio-issue-67`) — never the primary checkout on `main`.
-   - If on `main`, refuse: *"Intake must run inside a case-studies worktree. Run `/work-on-issue 67` first (or `cd` into the existing worktree)."*
+### 0. Bootstrap a worktree if needed
 
-2. **Scaffolding present**
-   - `content/case-studies/README.md` exists
-   - `scripts/upload-assets.ts` exists
-   - `lib/case-study/seed.ts` exports `SeedProject`
-   - If any are missing, refuse and point to issue #67.
+Detect where you are:
 
-3. **Env vars present**
-   - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` must be readable from `.env.local`. If missing, refuse and tell Fede to copy `.env.local` from the primary checkout.
+```bash
+PRIMARY="/Users/federicoostanbazan/portfolio-federico-ostan-bazan"
+CWD="$(pwd)"
+BRANCH_NOW="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+```
+
+**Case A — already in a worktree off `main`** (any branch that isn't `main` itself, in a directory other than `$PRIMARY`): continue to step 1.
+
+**Case B — sitting on `main` in the primary checkout** (`CWD = $PRIMARY` AND `BRANCH_NOW = main`): create a content-intake worktree before doing anything else.
+
+```bash
+cd "$PRIMARY"
+git fetch origin
+
+STAMP="$(date +%Y%m%d)"
+WORKTREE="../portfolio-intake-${STAMP}"
+BRANCH="content/intake-${STAMP}"
+
+if git worktree list | grep -q " \[${BRANCH}\]$"; then
+  # Worktree from earlier today already exists — reuse it.
+  WORKTREE="$(git worktree list --porcelain | awk -v b="refs/heads/${BRANCH}" '
+    /^worktree / {wt=$2}
+    $0=="branch "b {print wt}
+  ')"
+else
+  git worktree add -b "$BRANCH" "$WORKTREE" origin/main
+fi
+
+# Carry env + Vercel link across (see memory `feedback_worktree_env_copy`).
+cp .env.local "$WORKTREE/.env.local" 2>/dev/null || true
+cp -r .vercel "$WORKTREE/.vercel" 2>/dev/null || true
+
+# Carry the raw briefs across so path-mode (portfolio-cases/<slug>.md) resolves
+# inside the worktree. portfolio-cases/ is untracked at the repo root.
+if [ -d portfolio-cases ]; then
+  cp -r portfolio-cases "$WORKTREE/portfolio-cases" 2>/dev/null || true
+fi
+
+cd "$WORKTREE"
+pnpm install
+```
+
+Then announce in one short line:
+
+> Bootstrapped content-intake worktree at `../portfolio-intake-<STAMP>` on branch `content/intake-<STAMP>`. Continuing intake here.
+
+**Case C — anywhere else** (some other repo, detached HEAD, etc.): refuse. *"Run intake from the portfolio repo's primary checkout or an existing worktree."*
+
+### 1. Scaffolding present
+- `content/case-studies/README.md` exists
+- `scripts/upload-assets.ts` exists
+- `lib/case-study/seed.ts` exports `SeedProject`
+- If any are missing, refuse and point to issue #67.
+
+### 2. Env vars present
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` must be readable from `.env.local`. If missing, refuse and tell Fede to copy `.env.local` from the primary checkout.
 
 ## Procedure (per project)
 
@@ -170,8 +218,8 @@ When Fede says "images in `<slug>`" / "process `<slug>`" / "ready":
 
 ## What this skill does NOT do
 
-- Does not create the worktree (that's `/work-on-issue`)
-- Does not commit, push, or open a PR (that's `/qa-handoff`)
+- Does not create issue-driven worktrees (that's `/work-on-issue`). Intake bootstraps its own *content-intake* worktree (`content/intake-<date>`) when started from `main`; for an existing issue worktree, it just uses that one.
+- Does not commit, push, or open a PR (that's `/qa-handoff`). Note: `qa-handoff` currently expects a `feature/issue-N-<slug>` branch and parses `N` from it — a `content/intake-<date>` branch will not match. Handle that separately when you reach handoff.
 - Does not merge (that's `/ship-it`)
 - Does not edit or generate images — Fede provides them
 - Does not invent client companies — only metrics are invented; clients must be real

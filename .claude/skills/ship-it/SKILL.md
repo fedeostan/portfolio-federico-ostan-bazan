@@ -1,6 +1,6 @@
 ---
 name: ship-it
-description: Use when Fede replies "approved", "lgtm", "ship it", or invokes /ship-it on a session that just emitted a FEDE QA block. Squash-merges the PR, deletes the branch, flips the issue to status:completed, cascades unblocks to dependents whose deps are now all closed, removes the worktree, and fast-forwards the primary checkout. Refuses if there is no PR-in-flight or CI is failing.
+description: Use when Fede replies "approved", "lgtm", "ship it", or invokes /ship-it on a session that just emitted a FEDE QA block. Squash-merges the PR, deletes the branch, flips the issue to status:completed (issue mode) or skips issue housekeeping (content mode), cascades unblocks to dependents whose deps are now all closed, removes the worktree, and fast-forwards the primary checkout. Refuses if there is no PR-in-flight or CI is failing.
 ---
 
 # Skill: ship-it
@@ -15,9 +15,11 @@ Final merge dance. **Rigid skill — follow every step in order.**
 ## Pre-flight (refuse if any fail)
 
 1. **There must be a PR in flight from this session.**
-   - The current `git rev-parse --abbrev-ref HEAD` must match `feature/issue-N-<slug>`. If not, refuse: *"I can't ship — this session isn't on a feature branch. Which PR did you mean?"*
-   - Extract `N` from the branch name.
-   - Find the PR: `gh pr list --head "feature/issue-${N}-<slug>" --json number,url,state --jq '.[0]'`. Refuse if no PR or PR is not OPEN.
+   - Two branch patterns are accepted:
+     - **Issue mode** — `feature/issue-N-<slug>`. Extract `N`. Set `MODE=issue`.
+     - **Content mode** — `content/intake-<date>`. No issue. Set `MODE=content`.
+   - If neither pattern matches, refuse: *"I can't ship — this session isn't on a recognized branch. Which PR did you mean?"*
+   - Find the PR: `gh pr list --head "$(git rev-parse --abbrev-ref HEAD)" --json number,url,state --jq '.[0]'`. Refuse if no PR or PR is not OPEN.
 
 2. **CI must be green.**
    ```bash
@@ -35,14 +37,18 @@ Final merge dance. **Rigid skill — follow every step in order.**
 gh pr merge "$PR_NUMBER" --squash --delete-branch
 ```
 
-The merge auto-closes the issue via the `Closes #N` line in the PR body. Confirm:
+**Issue mode** — the merge auto-closes the issue via the `Closes #N` line. Confirm:
 
 ```bash
 gh issue view "$N" --json state --jq '.state'
 # expect: "CLOSED"
 ```
 
+**Content mode** — no issue to confirm; proceed.
+
 ### 2. Post the completion comment + flip labels
+
+**Issue mode only** — skip in content mode (no issue exists; jump to step 4).
 
 ```bash
 COMMIT_SHA=$(gh pr view "$PR_NUMBER" --json mergeCommit --jq '.mergeCommit.oid')
@@ -57,6 +63,8 @@ gh issue edit "$N" --add-label "status:completed" --remove-label "status:qa-pend
 ```
 
 ### 3. Cascade — unblock dependents
+
+**Issue mode only** — skip in content mode.
 
 Find every open issue whose body's "Depends on" section lists `#N`, then for each, re-evaluate whether **all** of its dependencies are now closed-with-completed-label. If yes, flip it from `status:blocked` to `status:available`.
 
@@ -106,7 +114,9 @@ git pull --ff-only origin main
 ### 5. Remove the worktree
 
 ```bash
-git worktree remove "../portfolio-issue-${N}"
+# Issue mode:   WORKTREE="../portfolio-issue-${N}"
+# Content mode: WORKTREE="../portfolio-intake-<date>"   (read from the branch name)
+git worktree remove "$WORKTREE"
 git worktree prune
 ```
 
@@ -114,14 +124,21 @@ If `git worktree remove` complains the worktree is dirty (unexpected, since we j
 
 ### 6. Report to Fede (one short paragraph)
 
-Use this format:
-
+**Issue mode**:
 ```
 Merged #N → main. Closed and labelled `status:completed`.
 Unblocked: <#X, #Y or "none">.
 Worktree removed. Local main is up to date.
 
 Ready for the next issue. Available now: <gh issue list --label status:available --json number,title --jq '.[] | "#\(.number) \(.title)"' joined with " · ">
+```
+
+**Content mode**:
+```
+Merged content batch <date> → main. <N> case studies live.
+Worktree removed. Local main is up to date.
+
+Live: <list of /case-studies/<slug> URLs>
 ```
 
 End the session.
