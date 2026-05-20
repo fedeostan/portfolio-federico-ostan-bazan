@@ -6,7 +6,6 @@ import type { ProjectAssetRow } from "@/lib/db/queries";
 
 type TextImageSplitProps = {
   side: "left" | "right";
-  heading?: string | null;
   contentMd?: string | null;
   asset: ProjectAssetRow | null;
   className?: string;
@@ -14,29 +13,19 @@ type TextImageSplitProps = {
 
 export function TextImageSplit({
   side,
-  heading,
   contentMd,
   asset,
   className,
 }: TextImageSplitProps) {
   const imageBlock = asset ? (
-    <div
-      className={cn(
-        "relative flex h-[430px] w-full max-w-[340px] flex-col items-center justify-end overflow-hidden rounded-4xl p-6 md:shrink-0",
-      )}
-    >
+    <div className="relative h-[430px] w-full max-w-[340px] overflow-hidden rounded-4xl md:shrink-0">
       <Image
         src={asset.url}
-        alt={asset.alt_text ?? heading ?? ""}
+        alt={asset.alt_text ?? ""}
         fill
         sizes="340px"
         className="object-cover"
       />
-      {heading ? (
-        <h2 className="text-foreground relative w-full text-xl leading-7 font-semibold">
-          {heading}
-        </h2>
-      ) : null}
     </div>
   ) : null;
 

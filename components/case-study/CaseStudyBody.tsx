@@ -52,7 +52,6 @@ function ImageTextSection({
     <section className="w-full">
       <TextImageSplit
         side={side}
-        heading={section.heading}
         contentMd={section.content_md}
         asset={asset}
       />

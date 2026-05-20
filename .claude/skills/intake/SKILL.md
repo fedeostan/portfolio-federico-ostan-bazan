@@ -105,8 +105,7 @@ Filenames + shapes (match exactly):
   • hero.png       2.5:1 ultra-wide panorama   2280×914   → CaseStudyHero band
   • cover.png      0.79:1 portrait (34:43)     680×860    → home grid card visual
   • process-01.png 0.79:1 portrait (34:43)     680×860    → pairs with "image+text" section, order 30
-                                                            (heading overlays the bottom ~120px — leave a dark/blank band)
-  • process-02.png 0.79:1 portrait (34:43)     680×860    → pairs with image+text, order 40 (same bottom-band rule)
+  • process-02.png 0.79:1 portrait (34:43)     680×860    → pairs with image+text, order 40
 
 Optional:
   • gallery-01.png … gallery-NN.png           1.58:1 landscape   2280×1440   → unpaired gallery block
