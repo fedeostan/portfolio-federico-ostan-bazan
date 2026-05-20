@@ -47,6 +47,12 @@ export async function searchProjects(
   opts: SearchProjectsOptions = {},
 ) {
   const supabase = createServerClient();
+  // search_tsv is a STORED generated column built with the 'simple' config
+  // (see 0001_initial_schema.sql::projects_search_doc). We intentionally keep
+  // 'simple' here: the corpus is dominated by proper nouns / brand / stack
+  // names where Porter stemming hurts more than it helps. Recall on abstract
+  // JD-derived queries is solved by the retry+list_published_projects
+  // fallback chain in the BRIEF-MODE workflow, not by a tsvector config swap.
   let query = supabase
     .from("projects")
     .select(PROJECT_LIST_COLUMNS)
@@ -72,6 +78,17 @@ export async function getProjectBySlug(slug: string) {
     .eq("slug", slug)
     .eq("published", true)
     .single<ProjectWithRelations>();
+}
+
+export async function listPublishedProjects(opts: { limit?: number } = {}) {
+  const supabase = createServerClient();
+  return supabase
+    .from("projects")
+    .select(PROJECT_LIST_COLUMNS)
+    .eq("published", true)
+    .order("year", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(opts.limit ?? 6);
 }
 
 export async function listProjectsByCategory(
