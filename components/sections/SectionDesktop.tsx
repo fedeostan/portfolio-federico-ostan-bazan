@@ -9,7 +9,7 @@ import type { ProjectCardProps, ProjectCategory } from "@/types/project";
 
 const TITLE = "Desktop";
 const DESCRIPTION =
-  "I started recognizing the power and flexibility of the big screen in my recent years. I have managed to push the limits of AI within this space and I'm very proud to show some of those projects here.";
+  "Came to the big screen late, but now I'm pushing what AI can do here. These are the projects I'm proudest of.";
 
 function toCardProps(row: ProjectListItem): ProjectCardProps {
   return {

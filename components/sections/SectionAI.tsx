@@ -9,7 +9,7 @@ import type { ProjectCardProps, ProjectCategory } from "@/types/project";
 
 const TITLE = "Artificial Intelligence";
 const DESCRIPTION =
-  "Here is my collection of A.I. related projects. I'm half obsessed with the potential of this technology and I feel the need to explore on my own in every free moment I have. Please enjoy exploring some of them as much as I enjoyed working on them.";
+  "Half obsession half experiment, these are the AI projects I keep building. Lately I can't seem to stop.";
 
 function toCardProps(row: ProjectListItem): ProjectCardProps {
   return {
