@@ -65,11 +65,13 @@ const SLIDE_MS = (transitions.pageSection.duration ?? 0.8) * 1000;
 interface LetsTalkAnimationProps {
   portrait: ReactNode;
   idleText: ReactNode;
+  className?: string;
 }
 
 export function LetsTalkAnimation({
   portrait,
   idleText,
+  className,
 }: LetsTalkAnimationProps) {
   const reduce = useReducedMotion();
   const [state, dispatch] = useReducer(reducer, { kind: "idle" });
@@ -118,6 +120,7 @@ export function LetsTalkAnimation({
       className={cn(
         "flex w-full items-center justify-center gap-[126px]",
         interactionLocked && "pointer-events-none",
+        className,
       )}
       aria-busy={interactionLocked}
     >
