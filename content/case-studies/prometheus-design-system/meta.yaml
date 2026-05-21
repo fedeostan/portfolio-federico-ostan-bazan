@@ -3,7 +3,7 @@ title: Prometheus — RockWallet's Design System Foundation
 client: RockWallet
 role: Head of Product Design
 year: 2025
-category: personal
+category: mobile
 published: true
 tech_stack: ["Figma Variables", "Code Connect", "Jetpack Compose", "SwiftUI", "Tailwind CSS v4", "Next.js 16", Vercel, npm]
 nda: false

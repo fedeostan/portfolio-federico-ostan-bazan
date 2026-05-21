@@ -6,7 +6,7 @@ const project: SeedProject = {
   client: "RockWallet",
   role: "Head of Product Design",
   year: 2024,
-  category: "mobile",
+  category: "desktop",
   published: true,
   summary:
     "RockWallet's stablecoin payments platform — merchant portal, consumer QR flows, and the payment-session contract that every surface compiles to.",

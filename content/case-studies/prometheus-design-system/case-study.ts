@@ -6,7 +6,7 @@ const project: SeedProject = {
   client: "RockWallet",
   role: "Head of Product Design",
   year: 2025,
-  category: "personal",
+  category: "mobile",
   published: true,
   summary:
     "RockWallet's cross-platform design-system foundation — Figma as canonical, native code as mirrors, and a Product Whiteboard PWA that keeps every component honest.",
