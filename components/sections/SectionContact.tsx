@@ -10,7 +10,7 @@ type SectionContactProps = {
 
 export function SectionContact({ id = "section-contact" }: SectionContactProps) {
   return (
-    <SectionShell id={id} className="bg-background px-6">
+    <SectionShell id={id} className="bg-background px-6 pb-24 md:pb-0">
       <LetsTalkMobile
         portrait={<ContactPortrait />}
         idleText={<WhoIAmCopy />}

@@ -26,7 +26,7 @@ export function SectionShell({
       aria-labelledby={ariaLabelledBy}
       tabIndex={-1}
       className={cn(
-        "relative grid h-svh w-full snap-start snap-always scroll-mt-0 place-items-center focus:outline-none",
+        "relative grid min-h-svh w-full snap-start snap-always scroll-mt-0 place-items-center focus:outline-none md:h-svh",
         className,
       )}
     >

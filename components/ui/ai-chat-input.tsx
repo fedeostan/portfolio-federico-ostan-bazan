@@ -357,7 +357,10 @@ export function AIChatInput({
               className="placeholder:text-muted-foreground w-full border-0 bg-transparent text-base font-medium outline-none placeholder:opacity-0"
               style={{ position: 'relative', zIndex: 1 }}
             />
-            <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 flex items-center overflow-hidden"
+            >
               <AnimatePresence mode="wait">
                 {showVoiceIndicator ? (
                   <motion.div

@@ -71,7 +71,7 @@ export default function RootLayout({
       lang="en"
       className={`light ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="flex min-h-full flex-col overflow-x-clip bg-background text-foreground">
         <BotIdClient protect={protectedRoutes} />
         <a
           href="#section-ai"

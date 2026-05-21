@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   AnimatePresence,
   MotionConfig,
@@ -38,6 +38,18 @@ export function BottomDock({
   const { scrollY } = useScroll()
   const reduce = useReducedMotion()
   const [visible, setVisible] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  // Track md+ (768px) so we can suppress the vertical pivot on phones — on a
+  // narrow viewport the vertical dock pressed against the right edge and
+  // overlapped contact-section content.
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsDesktop(mql.matches)
+    update()
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
 
   const sectionIds = useMemo(
     () => dockItems.map((item) => item.anchor.slice(1)),
@@ -50,7 +62,9 @@ export function BottomDock({
 
   const orientation: 'horizontal' | 'vertical' =
     orientationProp ??
-    (activeSectionId === VERTICAL_SECTION_ID ? 'vertical' : 'horizontal')
+    (isDesktop && activeSectionId === VERTICAL_SECTION_ID
+      ? 'vertical'
+      : 'horizontal')
 
   useMotionValueEvent(scrollY, 'change', (value) => {
     if (!visible && value > SHOW_AFTER_SCROLL_PX) {

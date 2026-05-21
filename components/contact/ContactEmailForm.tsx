@@ -63,7 +63,7 @@ export function ContactEmailForm({ onBack, onClose }: ContactEmailFormProps) {
   }
 
   return (
-    <div className="bg-background border-border flex w-full max-w-[342px] flex-col gap-6 overflow-clip rounded-[26px] border p-3 shadow-lg">
+    <div className="bg-background border-border flex w-[342px] max-w-full flex-col gap-6 overflow-clip rounded-[26px] border p-3 shadow-lg">
       <div className="flex w-full items-start justify-between">
         <button
           type="button"
