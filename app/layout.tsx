@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { BotIdClient } from 'botid/client'
 import './globals.css'
-import { BottomDock } from '@/components/nav/BottomDock'
+import { GlobalChrome } from '@/components/nav/GlobalChrome'
 import { Toaster } from '@/components/ui/sonner'
 import { getSiteUrl } from '@/lib/site'
 
@@ -79,7 +79,7 @@ export default function RootLayout({
         <main id="main" className="flex flex-1 flex-col">
           {children}
         </main>
-        <BottomDock />
+        <GlobalChrome />
         <Toaster />
       </body>
     </html>

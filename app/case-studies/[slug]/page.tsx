@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CaseStudyBody } from "@/components/case-study/CaseStudyBody";
+import {
+  CaseStudyDock,
+  type CaseStudyDockGroup,
+} from "@/components/case-study/CaseStudyDock";
 import { CaseStudyHero } from "@/components/case-study/CaseStudyHero";
 import { ProjectChat } from "@/components/case-study/ProjectChat";
 import { createServerClient } from "@/lib/db/client";
-import { getProjectBySlug } from "@/lib/db/queries";
+import { getProjectBySlug, listPublishedProjects } from "@/lib/db/queries";
 import { getHeroAsset } from "@/lib/case-study/sections";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+} from "@/lib/constants/categories";
+import type { ProjectCategory } from "@/types/project";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -50,10 +59,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
-  const { data: project } = await getProjectBySlug(slug);
+  const [{ data: project }, { data: allProjects }] = await Promise.all([
+    getProjectBySlug(slug),
+    listPublishedProjects({ limit: 100 }),
+  ]);
   if (!project) return notFound();
 
   const heroAsset = getHeroAsset(project.project_assets);
+
+  const dockGroups: CaseStudyDockGroup[] = CATEGORY_ORDER.flatMap(
+    (category) => {
+      const items = (allProjects ?? [])
+        .filter((p) => p.category === category)
+        .map((p) => ({ slug: p.slug, title: p.title }));
+      if (items.length === 0) return [];
+      return [
+        {
+          category: category as ProjectCategory,
+          label: CATEGORY_LABELS[category],
+          items,
+        },
+      ];
+    },
+  );
 
   return (
     <>
@@ -62,6 +90,11 @@ export default async function CaseStudyPage({ params }: PageProps) {
         <CaseStudyBody project={project} />
       </article>
       <ProjectChat projectId={project.slug} projectTitle={project.title} />
+      <CaseStudyDock
+        groups={dockGroups}
+        currentSlug={project.slug}
+        currentTitle={project.title}
+      />
     </>
   );
 }
