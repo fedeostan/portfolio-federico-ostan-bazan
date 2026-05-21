@@ -9,7 +9,7 @@ import type { ProjectCardProps, ProjectCategory } from "@/types/project";
 
 const TITLE = "Mobile";
 const DESCRIPTION =
-  "Crazy enough I started my career and have the majority of my experience working on mobile native environments. Here are some of my most professional experiences within the rectangular aspect ratio that fits in your palm.";
+  "I started here and never really left. Most of my professional work still fits inside the little rectangle in your palm.";
 
 function toCardProps(row: ProjectListItem): ProjectCardProps {
   return {
