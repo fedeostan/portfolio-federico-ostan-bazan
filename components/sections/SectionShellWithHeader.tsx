@@ -25,10 +25,10 @@ export function SectionShellWithHeader({
   return (
     <SectionShell
       id={id}
-      className={cn("bg-background", className)}
+      className={cn("bg-background min-h-0 md:min-h-svh", className)}
       aria-labelledby={headingId}
     >
-      <div className="flex w-full max-w-[1796px] flex-col gap-8 pt-12 pb-24 md:gap-10 md:pt-16 md:pb-28">
+      <div className="flex w-full max-w-[1796px] flex-col gap-8 pt-10 pb-16 md:gap-10 md:pt-16 md:pb-28">
         <header
           className={cn(
             "flex max-w-[610px] flex-col gap-6",

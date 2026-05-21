@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { LetsTalkAnimation } from "@/components/contact/LetsTalkAnimation";
+import { LetsTalkMobile } from "@/components/contact/LetsTalkMobile";
 import { SectionShell } from "@/components/motion/SectionShell";
 
 type SectionContactProps = {
@@ -9,10 +10,16 @@ type SectionContactProps = {
 
 export function SectionContact({ id = "section-contact" }: SectionContactProps) {
   return (
-    <SectionShell id={id} className="bg-background px-6">
+    <SectionShell id={id} className="bg-background px-6 pb-24 md:pb-0">
+      <LetsTalkMobile
+        portrait={<ContactPortrait />}
+        idleText={<WhoIAmCopy />}
+        className="md:hidden"
+      />
       <LetsTalkAnimation
         portrait={<ContactPortrait />}
         idleText={<WhoIAmCopy />}
+        className="hidden md:flex"
       />
     </SectionShell>
   );
@@ -52,8 +59,8 @@ function ContactPortrait() {
       alt="Portrait of Federico"
       width={473}
       height={524}
-      className="bg-muted h-[524px] w-[473px] rounded-[26px] object-cover"
-      sizes="473px"
+      className="bg-muted aspect-[473/524] h-auto w-full rounded-[26px] object-cover md:aspect-auto md:h-[524px] md:w-[473px]"
+      sizes="(min-width: 768px) 473px, 320px"
     />
   );
 }

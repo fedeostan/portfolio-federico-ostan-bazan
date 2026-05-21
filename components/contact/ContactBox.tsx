@@ -26,7 +26,7 @@ export function ContactBox({
   return (
     <div
       className={cn(
-        "bg-background border-border flex w-[342px] flex-col gap-6 overflow-clip rounded-[26px] border p-3 shadow-lg",
+        "bg-background border-border flex w-[342px] max-w-full flex-col gap-6 overflow-clip rounded-[26px] border p-3 shadow-lg",
       )}
       onMouseEnter={() => onHoverChange(true)}
       onMouseLeave={() => onHoverChange(false)}

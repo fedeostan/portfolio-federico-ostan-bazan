@@ -10,6 +10,12 @@ import type { ProjectCardProps } from "@/types/project";
 type Props = ProjectCardProps & {
   className?: string;
   href?: string;
+  /**
+   * Layout variant. "gallery" (default) is the tall image-bleed card used in
+   * the home-page sections. "compact" is the short horizontal row used in
+   * chat results — same width, ~1/3 the height, image-left + title-right.
+   */
+  variant?: "gallery" | "compact";
 };
 
 export function ProjectCard({
@@ -20,9 +26,48 @@ export function ProjectCard({
   role,
   className,
   href,
+  variant = "gallery",
 }: Props) {
   const link = href ?? `/case-studies/${slug}`;
   const hasImage = Boolean(og_image);
+
+  if (variant === "compact") {
+    return (
+      <Link
+        href={link}
+        aria-label={`Read more about ${title}`}
+        className={cn(
+          "group/card relative flex aspect-[34/14] w-full overflow-hidden rounded-4xl bg-card outline-none ring-1 ring-border transition-shadow duration-(--duration-base) ease-(--ease-standard) hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring",
+          className,
+        )}
+      >
+        <div className="relative aspect-square h-full shrink-0 bg-muted">
+          {hasImage ? (
+            <Image
+              src={og_image as string}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 263px, 147px"
+              className="object-cover object-center transition-transform duration-(--duration-slow) ease-(--ease-standard) group-hover/card:scale-105"
+            />
+          ) : null}
+        </div>
+        <div className="text-foreground flex flex-1 flex-col justify-between p-6">
+          <h3 className="font-heading line-clamp-2 text-xl leading-7 font-semibold">
+            {title}
+          </h3>
+          <span className="text-foreground inline-flex items-center gap-3 text-xs font-medium">
+            Read more
+            <ArrowRight
+              className="size-4 transition-transform duration-(--duration-base) ease-(--ease-standard) group-hover/card:translate-x-1"
+              strokeWidth={2}
+              aria-hidden
+            />
+          </span>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link

@@ -90,7 +90,7 @@ export function HeroSequence({ onSend }: HeroSequenceProps) {
     stage === "ready";
 
   return (
-    <div className="flex w-full max-w-3xl flex-col items-center gap-12 px-4">
+    <div className="flex w-full max-w-3xl flex-col items-center gap-8 px-4 md:gap-12">
       <div className="min-h-8 w-full">
         {showTitle ? (
           <HeroTitle

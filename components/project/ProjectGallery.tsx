@@ -90,7 +90,7 @@ export function ProjectGallery({ items, className }: ProjectGalleryProps) {
       </Carousel>
 
       <div
-        className="flex items-center justify-center gap-2"
+        className="flex items-center justify-center"
         role="tablist"
         aria-label="Gallery pagination"
       >
@@ -102,11 +102,15 @@ export function ProjectGallery({ items, className }: ProjectGalleryProps) {
             aria-selected={current === i}
             aria-label={`Go to slide ${i + 1}`}
             onClick={() => api?.scrollTo(i)}
-            className={cn(
-              "size-2 rounded-full transition-colors duration-(--duration-base) ease-(--ease-standard)",
-              current === i ? "bg-foreground" : "bg-foreground/20",
-            )}
-          />
+            className="group focus-visible:ring-ring inline-flex h-10 w-6 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2"
+          >
+            <span
+              className={cn(
+                "block size-2 rounded-full transition-colors duration-(--duration-base) ease-(--ease-standard)",
+                current === i ? "bg-foreground" : "bg-foreground/20",
+              )}
+            />
+          </button>
         ))}
       </div>
     </div>

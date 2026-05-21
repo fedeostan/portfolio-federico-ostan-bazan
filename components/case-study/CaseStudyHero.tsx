@@ -32,7 +32,7 @@ export function CaseStudyHero({ project, heroAsset, className }: CaseStudyHeroPr
   );
 
   return (
-    <header className={cn("flex flex-col items-center gap-12", className)}>
+    <header className={cn("flex flex-col items-center gap-8 md:gap-12", className)}>
       <div className="flex w-full max-w-[610px] flex-col items-center gap-6 text-center">
         <div className="text-foreground flex flex-wrap items-center justify-center gap-6 text-base leading-6 font-medium">
           {date ? <span>{date}</span> : null}
@@ -42,7 +42,7 @@ export function CaseStudyHero({ project, heroAsset, className }: CaseStudyHeroPr
             </span>
           ))}
         </div>
-        <h1 className="text-foreground text-4xl leading-10 font-semibold">
+        <h1 className="text-foreground text-3xl leading-9 font-semibold md:text-4xl md:leading-10">
           {project.title}
         </h1>
         {project.summary ? (
@@ -53,7 +53,7 @@ export function CaseStudyHero({ project, heroAsset, className }: CaseStudyHeroPr
       </div>
 
       {heroAsset ? (
-        <div className="bg-surface relative aspect-[1140/457] w-full overflow-hidden rounded-4xl">
+        <div className="bg-surface relative aspect-[4/3] w-full overflow-hidden rounded-4xl md:aspect-[1140/457]">
           <Image
             src={heroAsset.url}
             alt={heroAsset.alt_text ?? project.title}
