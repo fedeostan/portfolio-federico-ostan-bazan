@@ -1,0 +1,18 @@
+slug: personal-shopper-agent
+title: "Personal Shopper: A Multi-Agent State Machine for Psychological Product Discovery"
+client: Personal project
+role: Solo builder — design, agent architecture, n8n workflow, Next.js client
+year: 2026
+category: ai
+published: true
+tech_stack:
+  - n8n
+  - "OpenAI GPT-4o"
+  - "OpenAI GPT-4o-mini"
+  - "Perplexity API"
+  - Supabase
+  - PostgreSQL
+  - "Next.js 15"
+  - Tailwind
+  - "Vercel AI SDK"
+nda: false
