@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { LetsTalkAnimation } from "@/components/contact/LetsTalkAnimation";
 import { SectionShell } from "@/components/motion/SectionShell";
 
@@ -43,14 +45,15 @@ function WhoIAmCopy() {
   );
 }
 
-// TODO: replace with portrait photo. Drop a file at `/public/contact-portrait.jpg`
-// (or .webp) sized roughly 946x1048 (2x of the 473x524 render size).
 function ContactPortrait() {
   return (
-    <div
-      className="bg-muted h-[524px] w-[473px] rounded-[26px]"
-      role="img"
-      aria-label="Portrait of Federico"
+    <Image
+      src="/contact-portrait.png"
+      alt="Portrait of Federico"
+      width={473}
+      height={524}
+      className="bg-muted h-[524px] w-[473px] rounded-[26px] object-cover"
+      sizes="473px"
     />
   );
 }
