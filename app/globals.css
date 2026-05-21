@@ -155,6 +155,14 @@
   html {
     @apply font-sans;
   }
+  /* Defensive guard: prevent any descendant (animated transforms, embla
+   * carousel content, etc.) from forcing the document wider than the viewport.
+   * 'clip' does not establish a new containing block, so position: sticky
+   * descendants keep working — unlike 'hidden'. */
+  html,
+  body {
+    overflow-x: clip;
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
