@@ -44,7 +44,7 @@ export function ProjectGallery({ items, className }: ProjectGalleryProps) {
 
   return (
     <div className={cn("flex w-full flex-col gap-4", className)}>
-      <div className="hidden items-center justify-end gap-2 px-6 sm:flex md:px-12 2xl:px-[max(8rem,calc(50vw-700px))]">
+      <div className="hidden items-center justify-end gap-2 px-6 md:flex md:px-12 2xl:px-[max(8rem,calc(50vw-700px))]">
         <Button
           size="icon"
           variant="ghost"
