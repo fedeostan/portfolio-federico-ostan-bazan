@@ -140,6 +140,7 @@ export function ChatExperience({
                     >
                       <ProjectCard
                         {...toProjectCardProps(part.output)}
+                        variant="compact"
                       />
                     </motion.div>
                   ) : (
@@ -150,7 +151,7 @@ export function ChatExperience({
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <ProjectCardSkeleton />
+                      <ProjectCardSkeleton variant="compact" />
                     </motion.div>
                   )}
                 </AnimatePresence>
