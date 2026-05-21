@@ -1,0 +1,9 @@
+slug: how-i-ai
+title: "How I AI: Bringing AI Into the Product Team"
+client: RockWallet
+role: Head of Product Design
+year: 2026
+category: ai
+published: true
+tech_stack: [ChatGPT, "Claude Code", "Anthropic Agent SDK", "Vercel AI SDK", LangChain, n8n, MCP, A2A, Figma]
+nda: false
