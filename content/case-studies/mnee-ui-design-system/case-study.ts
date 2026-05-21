@@ -6,7 +6,7 @@ const project: SeedProject = {
   client: "RockWallet",
   role: "Head of Product Design",
   year: 2026,
-  category: "personal",
+  category: "desktop",
   published: true,
   summary:
     "Shipped `@mnee-ui/ui` v0.1.1 — Figma library, npm package, docs site, and a Tailwind v4 dogfooding fork of the consumer, all owned by Product Design.",

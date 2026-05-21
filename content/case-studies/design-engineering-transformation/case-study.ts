@@ -6,7 +6,7 @@ const project: SeedProject = {
   client: "RockWallet",
   role: "Head of Product Design",
   year: 2025,
-  category: "personal",
+  category: "ai",
   published: true,
   summary:
     "Rebuilt RockWallet's design-to-code pipeline from \"Figma as reference\" to a versioned npm package — 12 components, Code Connect mapped, ~80% less UI rework.",
