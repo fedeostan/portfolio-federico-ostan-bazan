@@ -113,7 +113,7 @@ export function ProjectChat({ projectId, projectTitle }: ProjectChatProps) {
         <SheetContent
           side="bottom"
           showCloseButton={false}
-          className="flex h-[85vh] flex-col rounded-t-2xl p-0 lg:hidden"
+          className="z-[10000] flex h-svh flex-col p-0 lg:hidden"
         >
           <SheetTitle className="sr-only">Ask about {projectTitle}</SheetTitle>
           <ChatHeader
