@@ -1,0 +1,9 @@
+slug: alfahackers-invoice-automation
+title: "AlphaHackers: Shopify → Xubio Invoice Automation"
+client: AlphaHackers
+role: Solo builder
+year: 2026
+category: personal
+published: true
+tech_stack: [n8n, Railway, "Shopify Admin API", Xubio, "Google Drive", "Google Sheets", Airtable, Telegram]
+nda: false
