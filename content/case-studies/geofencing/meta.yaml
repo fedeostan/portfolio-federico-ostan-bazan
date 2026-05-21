@@ -1,0 +1,9 @@
+slug: geofencing
+title: Geofencing & Regional Feature Restriction
+client: RockWallet
+role: Head of Product Design
+year: 2026
+category: mobile
+published: true
+tech_stack: [Figma, "Prometheus design system", Flutter, "Native location APIs", "IP geolocation", "SumSub geo-attestation"]
+nda: false

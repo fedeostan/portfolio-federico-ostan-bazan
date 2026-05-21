@@ -1,0 +1,9 @@
+slug: mnee-pay-platform
+title: "MNEE Pay: Stablecoin Payments Platform"
+client: RockWallet
+role: Head of Product Design
+year: 2024
+category: mobile
+published: true
+tech_stack: [Figma, Fireblocks, "2-of-3 Shamir's Secret Sharing", "WebAuthn / Passkeys", Stripe, "ERC-20", "1Sat Ordinals", "Cross River Bank", Borderless]
+nda: false
