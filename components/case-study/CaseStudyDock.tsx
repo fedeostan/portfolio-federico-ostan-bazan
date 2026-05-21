@@ -67,6 +67,8 @@ export function CaseStudyDock({
 }: CaseStudyDockProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [vw, setVw] = useState<number | null>(null);
+  const [vh, setVh] = useState<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,6 +86,26 @@ export function CaseStudyDock({
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const update = () => {
+      setVw(window.innerWidth);
+      setVh(window.innerHeight);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // Default to desktop dimensions before mount so SSR markup is stable;
+  // useEffect re-renders with the real viewport on mount. Framer Motion's
+  // initial={false} on the pill prevents this re-render from animating.
+  const isMobile = vw !== null && vw < 768;
+  const collapsedWidth = isMobile ? 260 : 300;
+  const expandedWidth =
+    isMobile && vw !== null ? Math.min(360, vw - 32) : 340;
+  const expandedHeight =
+    isMobile && vh !== null ? Math.min(440, vh - 120) : 440;
 
   return (
     <>
@@ -112,8 +134,8 @@ export function CaseStudyDock({
           }}
           initial={false}
           animate={{
-            width: isExpanded ? 340 : 300,
-            height: isExpanded ? 440 : 52,
+            width: isExpanded ? expandedWidth : collapsedWidth,
+            height: isExpanded ? expandedHeight : 52,
             borderRadius: isExpanded ? 24 : 26,
           }}
           transition={islandTransition}
