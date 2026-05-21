@@ -1,0 +1,18 @@
+slug: ugc-lead-gen-pipeline
+title: "UGC Lead Gen: A Cost-Aware Outbound Pipeline With AI Brand Research and Pre-Pitch Generation"
+client: Josephine Remo
+role: Solo builder — pipeline architecture, n8n workflows, enrichment waterfall, LLM prompt design
+year: 2026
+category: personal
+published: true
+tech_stack:
+  - n8n
+  - "Perplexity API"
+  - Apify
+  - Hunter.io
+  - Apollo.io
+  - "OpenAI GPT-4o-mini"
+  - "Google Sheets"
+  - "Telegram Bot API"
+  - Railway
+nda: false
