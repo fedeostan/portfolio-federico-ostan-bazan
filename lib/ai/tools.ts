@@ -42,7 +42,7 @@ export function buildTools(opts: BuildToolsOptions = {}) {
     search_projects: tool({
       description: scopedId
         ? `Search within the current case study ("${scopedId}") only. Use a focused query to surface this project's slug, title, summary, category, tech_stack, role, year.`
-        : "Search Federico's published projects by free text. Optionally filter by category. Returns a short list (slug, title, summary, category, tech_stack, role, year) suitable for follow-up calls to show_project_card or get_project_detail.",
+        : "Search Federico's published projects by free text. Optionally filter by category. Returns a relevance-ranked list, best match first (slug, title, summary, category, tech_stack, role, year), suitable for follow-up calls to show_project_card or get_project_detail.",
       inputSchema: z.object({
         query: z.string().min(2),
         category: categorySchema.optional(),

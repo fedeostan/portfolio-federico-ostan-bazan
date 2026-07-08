@@ -47,27 +47,18 @@ export async function searchProjects(
   opts: SearchProjectsOptions = {},
 ) {
   const supabase = createServerClient();
-  // search_tsv is a STORED generated column built with the 'simple' config
-  // (see 0001_initial_schema.sql::projects_search_doc). We intentionally keep
-  // 'simple' here: the corpus is dominated by proper nouns / brand / stack
-  // names where Porter stemming hurts more than it helps. Recall on abstract
-  // JD-derived queries is solved by the retry+list_published_projects
-  // fallback chain in the BRIEF-MODE workflow, not by a tsvector config swap.
-  let query = supabase
-    .from("projects")
-    .select(PROJECT_LIST_COLUMNS)
-    .eq("published", true)
-    .textSearch("search_tsv", q, { type: "websearch", config: "simple" });
-
-  if (opts.category) {
-    query = query.eq("category", opts.category);
-  }
-
-  if (opts.project_id) {
-    query = query.eq("slug", opts.project_id);
-  }
-
-  return query.limit(opts.limit ?? 5);
+  // Ranked FTS lives in SQL (0003_ranked_search.sql::search_projects_ranked)
+  // because PostgREST's .textSearch() cannot ORDER BY ts_rank — without rank
+  // ordering, LIMIT returns an arbitrary subset whenever matches exceed the
+  // limit. search_tsv concatenates 'simple' + 'english' vectors: 'simple'
+  // keeps exact proper-noun/brand/stack tokens (MNEE, SwiftUI), 'english'
+  // adds stems so plural queries ("design systems") still match.
+  return supabase.rpc("search_projects_ranked", {
+    q,
+    p_category: opts.category,
+    p_slug: opts.project_id,
+    p_limit: opts.limit ?? 5,
+  });
 }
 
 export async function getProjectBySlug(slug: string) {
