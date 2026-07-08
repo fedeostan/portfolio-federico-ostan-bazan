@@ -1,17 +1,17 @@
 slug: patricia-margaret-finance-agent
-title: "Patricia & Margaret: A Production-Grade Household Finance Agent on Telegram"
+title: 'Patricia & Margaret: A Production-Grade Household Finance Agent on Telegram'
 client: Personal project
-role: Solo builder — agent design, n8n workflow, Supabase schema, multimodal pipeline, multi-user architecture
+role: Solo builder
 year: 2026
 category: ai
 published: true
 tech_stack:
   - n8n
-  - "LangChain AI Agent node"
-  - "OpenAI GPT-4o"
-  - "OpenAI GPT-4o-mini"
+  - 'LangChain AI Agent node'
+  - 'OpenAI GPT-4o'
+  - 'OpenAI GPT-4o-mini'
   - Supabase
   - PostgreSQL
-  - "Telegram Bot API"
+  - 'Telegram Bot API'
   - Railway
 nda: false

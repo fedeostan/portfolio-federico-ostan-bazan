@@ -60,7 +60,7 @@ export function AIChatInput({
   const [dragActive, setDragActive] = useState(false)
   const dragDepthRef = useRef(0)
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const reduce = useReducedMotion()
 
@@ -136,14 +136,14 @@ export function AIChatInput({
     inputRef.current?.blur()
   }
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       handleSubmit()
     }
   }
 
-  const handlePaste = (event: ReactClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
     if (!onPasteUrl || attachDisabled) return
     const pasted = event.clipboardData.getData('text')
     if (!pasted) return
@@ -215,12 +215,10 @@ export function AIChatInput({
 
   const containerVariants: Variants = {
     collapsed: {
-      height: 68,
       boxShadow: '0 2px 8px 0 rgba(0,0,0,0.08)',
       transition: reduce ? { duration: 0 } : { type: 'spring', stiffness: 120, damping: 18 },
     },
     expanded: {
-      height: 128,
       boxShadow: '0 8px 32px 0 rgba(0,0,0,0.16)',
       transition: reduce ? { duration: 0 } : { type: 'spring', stiffness: 120, damping: 18 },
     },
@@ -302,6 +300,7 @@ export function AIChatInput({
       ref={wrapperRef}
       role="group"
       aria-label="Chat input"
+      layout
       className={cn(
         'bg-surface text-foreground w-full overflow-hidden rounded-4xl transition-shadow',
         dragActive && 'ring-foreground/30 ring-2 ring-offset-2',
@@ -320,46 +319,23 @@ export function AIChatInput({
       onDrop={handleDrop}
     >
       <div className="flex w-full flex-col">
-        <div className="flex items-center gap-2 p-3">
-          <button
-            type="button"
-            aria-label="Attach a job description (PDF, DOCX, MD, TXT)"
-            disabled={!onAttachFile || attachDisabled}
-            onClick={handleAttachClick}
-            className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40"
-          >
-            <Icon name="Paperclip" size={20} />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={FILE_ACCEPT}
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden
-            onChange={(event) => {
-              const file = event.target.files?.[0]
-              event.target.value = ''
-              if (file && onAttachFile) onAttachFile(file)
-            }}
-          />
-
-          <div className="relative flex-1">
-            <input
+        <div className="px-4 pt-4 pb-1">
+          <div className="relative">
+            <textarea
               ref={inputRef}
-              type="text"
+              rows={1}
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
               onFocus={() => setIsActive(true)}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
               aria-label="Ask Federico anything"
-              className="placeholder:text-muted-foreground w-full border-0 bg-transparent text-base font-medium outline-none placeholder:opacity-0"
+              className="field-sizing-content max-h-60 min-h-6 w-full resize-none overflow-y-auto border-0 bg-transparent text-base font-medium outline-none placeholder:opacity-0"
               style={{ position: 'relative', zIndex: 1 }}
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 flex items-center overflow-hidden"
+              className="pointer-events-none absolute inset-0 flex items-start overflow-hidden"
             >
               <AnimatePresence mode="wait">
                 {showVoiceIndicator ? (
@@ -385,7 +361,7 @@ export function AIChatInput({
                   shouldCycle && (
                     <motion.span
                       key={placeholderIndex}
-                      className="text-muted-foreground absolute top-1/2 left-0 flex -translate-y-1/2 text-base font-medium whitespace-nowrap select-none"
+                      className="text-muted-foreground absolute top-0 left-0 flex text-base font-medium whitespace-nowrap select-none"
                       variants={placeholderContainerVariants}
                       initial="initial"
                       animate="animate"
@@ -406,127 +382,154 @@ export function AIChatInput({
               </AnimatePresence>
             </div>
           </div>
-
-          <AnimatePresence initial={false}>
-            {showCancel && (
-              <motion.button
-                key="cancel-voice"
-                type="button"
-                aria-label="Cancel recording"
-                onClick={handleCancelClick}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.85 }}
-                transition={{ duration: reduce ? 0 : 0.15 }}
-                className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-              >
-                <Icon name="X" size={20} />
-              </motion.button>
-            )}
-          </AnimatePresence>
-
-          <button
-            type="button"
-            aria-label={micLabel}
-            aria-pressed={isRecording}
-            disabled={isStopping || isTranscribing || isRequesting}
-            onClick={handleMicClick}
-            className={cn(
-              'focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60',
-              isRecording
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/85'
-                : 'hover:bg-accent',
-            )}
-          >
-            {isRecording ? (
-              <motion.span
-                animate={reduce ? undefined : { scale: [1, 1.15, 1] }}
-                transition={
-                  reduce ? undefined : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
-                }
-                className="flex items-center justify-center"
-              >
-                <Icon name="Square" size={16} />
-              </motion.span>
-            ) : isTranscribing || isStopping || isRequesting ? (
-              <Icon name="Loader2" size={18} className="animate-spin" />
-            ) : (
-              <Icon name="Mic" size={20} />
-            )}
-          </button>
-
-          <button
-            type="button"
-            aria-label="Send message"
-            disabled={!inputValue.trim() || isVoiceBusy}
-            onClick={(event) => {
-              stopBubble(event)
-              handleSubmit()
-            }}
-            className="bg-primary text-primary-foreground hover:bg-foreground/85 focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40"
-          >
-            <Icon name="Send" size={18} />
-          </button>
         </div>
 
-        <motion.div
-          className="flex items-center px-4 text-sm"
-          variants={controlsVariants}
-          initial="hidden"
-          animate={isExpanded ? 'visible' : 'hidden'}
-          aria-hidden={!isExpanded}
-        >
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-2 px-3 pt-1 pb-3">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              aria-pressed={thinkActive}
-              tabIndex={isExpanded ? 0 : -1}
-              onClick={(event) => {
-                stopBubble(event)
-                setThinkActive((prev) => !prev)
+              aria-label="Attach a job description (PDF, DOCX, MD, TXT)"
+              disabled={!onAttachFile || attachDisabled}
+              onClick={handleAttachClick}
+              className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40"
+            >
+              <Icon name="Paperclip" size={20} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={FILE_ACCEPT}
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                event.target.value = ''
+                if (file && onAttachFile) onAttachFile(file)
               }}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <motion.div
+              className="flex items-center gap-3 text-sm"
+              variants={controlsVariants}
+              initial="hidden"
+              animate={isExpanded ? 'visible' : 'hidden'}
+              aria-hidden={!isExpanded}
+            >
+              <button
+                type="button"
+                aria-pressed={thinkActive}
+                tabIndex={isExpanded ? 0 : -1}
+                onClick={(event) => {
+                  stopBubble(event)
+                  setThinkActive((prev) => !prev)
+                }}
+                className={cn(
+                  'focus-visible:ring-ring flex items-center gap-1 rounded-full px-4 py-2 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  thinkActive ? activeChipClasses : inactiveChipClasses,
+                )}
+              >
+                <Icon name="Lightbulb" size={18} />
+                Think
+              </button>
+
+              <motion.button
+                type="button"
+                aria-pressed={deepSearchActive}
+                aria-label="Deep Search"
+                tabIndex={isExpanded ? 0 : -1}
+                onClick={(event) => {
+                  stopBubble(event)
+                  setDeepSearchActive((prev) => !prev)
+                }}
+                className={cn(
+                  'focus-visible:ring-ring flex items-center justify-start gap-1 overflow-hidden rounded-full py-2 font-medium whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  deepSearchActive ? activeChipClasses : inactiveChipClasses,
+                )}
+                initial={false}
+                animate={{
+                  width: deepSearchActive ? 140 : 40,
+                  paddingLeft: deepSearchActive ? 12 : 11,
+                  paddingRight: deepSearchActive ? 16 : 11,
+                  transition: reduce ? { duration: 0 } : undefined,
+                }}
+              >
+                <Icon name="Globe" size={18} className="shrink-0" />
+                <motion.span
+                  initial={false}
+                  animate={{ opacity: deepSearchActive ? 1 : 0 }}
+                  transition={{ duration: reduce ? 0 : 0.2 }}
+                  className="shrink-0 pb-[2px]"
+                >
+                  Deep Search
+                </motion.span>
+              </motion.button>
+            </motion.div>
+
+            <AnimatePresence initial={false}>
+              {showCancel && (
+                <motion.button
+                  key="cancel-voice"
+                  type="button"
+                  aria-label="Cancel recording"
+                  onClick={handleCancelClick}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: reduce ? 0 : 0.15 }}
+                  className="hover:bg-accent focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                >
+                  <Icon name="X" size={20} />
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            <button
+              type="button"
+              aria-label={micLabel}
+              aria-pressed={isRecording}
+              disabled={isStopping || isTranscribing || isRequesting}
+              onClick={handleMicClick}
               className={cn(
-                'focus-visible:ring-ring flex items-center gap-1 rounded-full px-4 py-2 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                thinkActive ? activeChipClasses : inactiveChipClasses,
+                'focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60',
+                isRecording
+                  ? 'bg-destructive text-destructive-foreground hover:bg-destructive/85'
+                  : 'hover:bg-accent',
               )}
             >
-              <Icon name="Lightbulb" size={18} />
-              Think
+              {isRecording ? (
+                <motion.span
+                  animate={reduce ? undefined : { scale: [1, 1.15, 1] }}
+                  transition={
+                    reduce ? undefined : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
+                  }
+                  className="flex items-center justify-center"
+                >
+                  <Icon name="Square" size={16} />
+                </motion.span>
+              ) : isTranscribing || isStopping || isRequesting ? (
+                <Icon name="Loader2" size={18} className="animate-spin" />
+              ) : (
+                <Icon name="Mic" size={20} />
+              )}
             </button>
 
-            <motion.button
+            <button
               type="button"
-              aria-pressed={deepSearchActive}
-              aria-label="Deep Search"
-              tabIndex={isExpanded ? 0 : -1}
+              aria-label="Send message"
+              disabled={!inputValue.trim() || isVoiceBusy}
               onClick={(event) => {
                 stopBubble(event)
-                setDeepSearchActive((prev) => !prev)
+                handleSubmit()
               }}
-              className={cn(
-                'focus-visible:ring-ring flex items-center justify-start gap-1 overflow-hidden rounded-full py-2 font-medium whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                deepSearchActive ? activeChipClasses : inactiveChipClasses,
-              )}
-              initial={false}
-              animate={{
-                width: deepSearchActive ? 140 : 40,
-                paddingLeft: deepSearchActive ? 12 : 11,
-                paddingRight: deepSearchActive ? 16 : 11,
-                transition: reduce ? { duration: 0 } : undefined,
-              }}
+              className="bg-primary text-primary-foreground hover:bg-foreground/85 focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40"
             >
-              <Icon name="Globe" size={18} className="shrink-0" />
-              <motion.span
-                initial={false}
-                animate={{ opacity: deepSearchActive ? 1 : 0 }}
-                transition={{ duration: reduce ? 0 : 0.2 }}
-                className="shrink-0 pb-[2px]"
-              >
-                Deep Search
-              </motion.span>
-            </motion.button>
+              <Icon name="Send" size={18} />
+            </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   )
@@ -541,9 +544,7 @@ function VoiceWaveform({ active, reduce }: { active: boolean; reduce: boolean })
           key={index}
           className="bg-destructive block w-[3px] rounded-full"
           initial={{ height: 6 }}
-          animate={
-            active && !reduce ? { height: [6, 14, 8, 16, 6] } : { height: 6 }
-          }
+          animate={active && !reduce ? { height: [6, 14, 8, 16, 6] } : { height: 6 }}
           transition={
             active && !reduce
               ? {
