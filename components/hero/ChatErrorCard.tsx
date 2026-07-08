@@ -5,7 +5,7 @@ import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type ChatErrorVariant = "rate-limit" | "network" | "server";
+type ChatErrorVariant = "rate-limit" | "network" | "blocked" | "server";
 
 const COPY: Record<ChatErrorVariant, { headline: string; sub: string }> = {
   "rate-limit": {
@@ -15,6 +15,10 @@ const COPY: Record<ChatErrorVariant, { headline: string; sub: string }> = {
   network: {
     headline: "Looks like your connection blinked.",
     sub: "Check your network and retry.",
+  },
+  blocked: {
+    headline: "My bot filter got a little suspicious.",
+    sub: "You're clearly human — give it a second and retry.",
   },
   server: {
     headline: "Something glitched on my end.",
@@ -26,6 +30,7 @@ export function classifyChatError(error: Error): ChatErrorVariant {
   const msg = error.message.toLowerCase();
   if (msg.includes("429") || msg.includes("rate")) return "rate-limit";
   if (msg.includes("fetch") || msg.includes("network")) return "network";
+  if (msg.includes("403") || msg.includes("forbidden")) return "blocked";
   return "server";
 }
 

@@ -15,7 +15,7 @@ import {
   logRateLimitHit,
   rateLimitResponse,
 } from "@/lib/api/rate-limit";
-import { botBlockedResponse, logBotBlock, verifyBotId } from "@/lib/api/bot-id";
+import { logBotBlock, verifyBotId } from "@/lib/api/bot-id";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -34,10 +34,12 @@ export async function POST(req: Request) {
     return rateLimitResponse(limit);
   }
 
+  // BotID is observe-only here: its client handshake false-positives fresh
+  // visitors (first load, ad blockers), and blocking real humans costs more
+  // than the tokens a bot could burn. The rate limiter above bounds spend.
   const bot = await verifyBotId();
   if (bot.isBot) {
     logBotBlock("chat", req);
-    return botBlockedResponse();
   }
 
   let parsed: z.infer<typeof bodySchema>;
