@@ -188,6 +188,25 @@ export type Database = {
         }
         Returns: unknown
       }
+      search_projects_ranked: {
+        Args: {
+          p_category?: string
+          p_limit?: number
+          p_slug?: string
+          q: string
+        }
+        Returns: {
+          category: string
+          id: string
+          og_image: string
+          role: string
+          slug: string
+          summary: string
+          tech_stack: string[]
+          title: string
+          year: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
